@@ -299,8 +299,12 @@
     </classes>
     <functions>
       <function>
-        <function_signature>def get_functions_from_file(filepath: str) -&gt; list</function_signature>
-        <docstring>No function description.</docstring>
+        <function_signature>def get_calls_from_node(node) -&gt; list</function_signature>
+        <docstring>Traverses the AST node of a function to identify all function and method calls.</docstring>
+      </function>
+      <function>
+        <function_signature>def scan_file_structure(filepath: str) -&gt; list</function_signature>
+        <docstring>Parses a Python file using AST to extract top-level functions and classes with their methods.</docstring>
       </function>
       <function>
         <function_signature>def generate_fallback_summary(func: dict) -&gt; str</function_signature>
@@ -309,6 +313,10 @@
       <function>
         <function_signature>def build_meaningful_map(dirpath: str) -&gt; list</function_signature>
         <docstring>No function description.</docstring>
+      </function>
+      <function>
+        <function_signature>def flatten_meaningful_map(meaningful_map: list) -&gt; list</function_signature>
+        <docstring>Flattens the structured classes and functions map into separate document dicts for the search engine.</docstring>
       </function>
     </functions>
   </file>
