@@ -1,5 +1,6 @@
 import re
 import math
+import json
 from collections import Counter
 from typing import Dict, Any, List, Optional, Set, Tuple
 from tools import (
@@ -14,7 +15,9 @@ from tools import (
     DeploymentTool,
     SystemDesignTool,
     DocumentationTool,
-    DefaultAgentChat
+    DefaultAgentChat,
+    get_nvidia_api_key,
+    query_nvidia
 )
 
 # ==========================================
@@ -305,8 +308,61 @@ class HierarchicalRouter:
 
 
 # ==========================================
-# TOOL RESOLUTION (Imported from tools.py)
+# AGENTIC PLANNER
 # ==========================================
+
+class AgenticPlanner:
+    SYSTEM_PROMPT = (
+        "You are an expert agent planner. Given a user's coding request and a list of available tools, "
+        "your job is to break down the request into a structured sequence of execution steps.\n\n"
+        "Each step in the plan must correspond to ONE tool. For each step, you must output:\n"
+        "- 'tool': The high-level intent key of the tool to use (must be one of: Learn, Build, Fix, Improve, Analyze, Convert, Test, Deploy, Design, Document, Default).\n"
+        "- 'description': A short sentence explaining what this step does.\n"
+        "- 'prompt': The refined sub-prompt tailored for this specific tool.\n\n"
+        "Return ONLY a valid JSON object with a single top-level key 'plan' containing the array of steps. "
+        "Do not include any markdown formatting (e.g., no ```json block wrapper), no explanations, no text before or after the JSON. "
+        "Ensure the JSON is strictly valid.\n\n"
+        "Example output:\n"
+        "{\n"
+        "  \"plan\": [\n"
+        "    {\n"
+        "      \"tool\": \"Build\",\n"
+        "      \"description\": \"Generate the backend express server script\",\n"
+        "      \"prompt\": \"Create a backend node express server with standard CRUD endpoints.\"\n"
+        "    },\n"
+        "    {\n"
+        "      \"tool\": \"Test\",\n"
+        "      \"description\": \"Write unit tests for the express server\",\n"
+        "      \"prompt\": \"Write integration/unit tests using mocha/chai for the express server crud endpoints.\"\n"
+        "    }\n"
+        "  ]\n"
+        "}"
+    )
+
+    def plan(self, prompt: str, tools_info: list) -> list:
+        api_key = get_nvidia_api_key()
+        if not api_key:
+            return []
+            
+        tools_str = json.dumps(tools_info, indent=2)
+        user_prompt = (
+            f"User Coding Request: \"{prompt}\"\n\n"
+            f"Available Tools:\n{tools_str}\n\n"
+            f"Please generate the JSON plan containing the sequence of steps to fulfill this request."
+        )
+        
+        try:
+            res = query_nvidia(user_prompt, self.SYSTEM_PROMPT).strip()
+            # Clean up potential markdown wrappers
+            if res.startswith("```"):
+                res = re.sub(r"^```(?:json)?\n", "", res)
+                res = re.sub(r"\n```$", "", res)
+            res = res.strip()
+            
+            plan_data = json.loads(res)
+            return plan_data.get("plan", [])
+        except Exception:
+            return []
 
 
 # ==========================================
@@ -338,30 +394,84 @@ class ToolOrchestrator:
         return self.tools.get(high_level_intent, self.tools["Default"])
 
     def process_and_execute(self, prompt: str) -> Dict[str, Any]:
-        # Step 1: Run Router
-        routing_result = self.router.route(prompt)
-        high_intents = routing_result["high_level"]
-        low_intents = routing_result["low_level"]
-
+        # Gather tool info for the planner
+        tools_info = []
+        for intent, tool in self.tools.items():
+            if intent == "Default":
+                continue
+            tools_info.append({
+                "tool": intent,
+                "name": tool.name,
+                "description": tool.description
+            })
+            
+        planner = AgenticPlanner()
+        plan = planner.plan(prompt, tools_info)
+        
+        is_fallback = False
+        if not plan:
+            # Fall back to Hierarchical Router
+            is_fallback = True
+            routing_result = self.router.route(prompt)
+            high_intents = routing_result["high_level"]
+            
+            plan = []
+            for intent in high_intents:
+                plan.append({
+                    "tool": intent,
+                    "description": f"Fallback route to {intent} tool",
+                    "prompt": prompt
+                })
+                
         execution_outputs = []
         dispatched_tools = []
-
-        # Step 2: Dispatch and Execute matched tools
-        for intent in high_intents:
+        step_details = []
+        
+        for step in plan:
+            intent = step["tool"]
+            step_prompt = step["prompt"]
+            step_desc = step["description"]
+            
             tool = self.get_tool_for_intent(intent)
-            if tool.name not in [t.name for t in dispatched_tools]:
-                dispatched_tools.append(tool)
-                # Filter low intents corresponding to this high level intent if needed (simplified here)
-                output = tool.execute(prompt, low_intents)
-                execution_outputs.append(output)
-
+            if tool.name not in dispatched_tools:
+                dispatched_tools.append(tool.name)
+            
+            # Retrieve low-level intents for this step's sub-prompt
+            step_routing = self.router.route(step_prompt)
+            step_low_levels = step_routing["low_level"]
+            
+            # Execute
+            output = tool.execute(step_prompt, step_low_levels)
+            execution_outputs.append(output)
+            
+            step_details.append({
+                "tool": tool.name,
+                "intent": intent,
+                "description": step_desc,
+                "prompt": step_prompt,
+                "output": output
+            })
+            
+        if plan:
+            first_step_routing = self.router.route(plan[0]["prompt"])
+            high_level = first_step_routing["high_level"]
+            low_level = first_step_routing["low_level"]
+            confidence = first_step_routing["best_score"]
+        else:
+            high_level = ["Default"]
+            low_level = ["Concept"]
+            confidence = 0.0
+            
         return {
             "prompt": prompt,
-            "high_level": high_intents[0] if len(high_intents) == 1 else high_intents,
-            "low_level": low_intents[0] if len(low_intents) == 1 else low_intents,
-            "confidence": routing_result["best_score"],
-            "dispatched_tools": [t.name for t in dispatched_tools],
-            "execution_results": execution_outputs
+            "plan": plan,
+            "is_fallback": is_fallback,
+            "high_level": high_level[0] if len(high_level) == 1 else high_level,
+            "low_level": low_level[0] if len(low_level) == 1 else low_level,
+            "confidence": confidence,
+            "dispatched_tools": dispatched_tools,
+            "execution_results": execution_outputs,
+            "steps": step_details
         }
 
 
@@ -388,9 +498,16 @@ if __name__ == "__main__":
     for test in startup_tests:
         res = orchestrator.process_and_execute(test)
         print(f"\nPrompt:      \"{test}\"")
+        if "plan" in res:
+            print("Generated Plan:")
+            for i, step in enumerate(res["plan"], 1):
+                fallback_flag = " (Fallback)" if res.get("is_fallback") else ""
+                print(f"  Step {i}{fallback_flag}: {step['description']} [{step['tool']}]")
         print(f"Intents:     {res['high_level']} -> {res['low_level']}")
         print(f"Tools Run:   {res['dispatched_tools']}")
-        print(f"Execution Output:\n" + "\n".join(res['execution_results']))
+        print(f"Execution Output:")
+        for output in res['execution_results']:
+            print(output)
         print("-" * 50)
     print("======================================================================\n")
 
@@ -405,13 +522,25 @@ if __name__ == "__main__":
                 
             result = orchestrator.process_and_execute(prompt)
             print("-" * 70)
+            if "plan" in result:
+                print("Generated Plan:")
+                for i, step in enumerate(result["plan"], 1):
+                    fallback_flag = " (Fallback)" if result.get("is_fallback") else ""
+                    print(f"  Step {i}{fallback_flag}: {step['description']} [{step['tool']}]")
+                    print(f"    Prompt: {step['prompt']}")
+                print("-" * 70)
             print(f"Identified Intent:  {result['high_level']} -> {result['low_level']}")
             print(f"Triggered Tools:    {result['dispatched_tools']}")
             print(f"Confidence score:   {result['confidence']}")
             print("-" * 70)
             print("Execution Outputs:")
-            for output in result["execution_results"]:
-                print(output)
+            if "steps" in result:
+                for i, step in enumerate(result["steps"], 1):
+                    print(f"\n[Step {i}] Execution Result of {step['tool']}:")
+                    print(step["output"])
+            else:
+                for output in result["execution_results"]:
+                    print(output)
             print("-" * 70 + "\n")
         except (KeyboardInterrupt, EOFError):
             print("\nExiting. Goodbye!")
