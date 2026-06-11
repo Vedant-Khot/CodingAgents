@@ -82,7 +82,7 @@ def build_meaningful_map(dirpath: str) -> list:
             pass
             
     api_key = get_nvidia_api_key()
-    
+    print(api_key);
     for func in all_functions:
         cache_key = (func["file"], func["name"])
         if cache_key in cache_map and cache_map[cache_key]:
