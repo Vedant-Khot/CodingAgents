@@ -107,7 +107,9 @@ def generate_fallback_summary(func: dict) -> str:
     doc = func["docstring"].strip().split("\n")[0] if func["docstring"] else ""
     if doc:
         return doc
-    words = func["name"].split("_")
+    words = [w for w in func["name"].split("_") if w]
+    if not words:
+        words = [func["name"]]
     words[0] = words[0].capitalize()
     return f"{' '.join(words)} in {func['file']}."
 
@@ -156,11 +158,22 @@ def build_meaningful_map(dirpath: str) -> list:
                         method["summary"] = cached_summary
                         continue
                         
-                if api_key:
-                    prompt = f"Write a 1-sentence summary of what the class method '{class_name}.{method['name']}' does:\n\n{method['code']}"
-                    sys_prompt = "You are a compiler that outputs a single short sentence explaining a class method."
+                if method.get("docstring"):
+                    summary = generate_fallback_summary(method)
+                elif api_key:
+                    prompt = (
+                        f"Explain in one sentence what this python method '{class_name}.{method['name']}' does. "
+                        f"Output ONLY the explanation, do not analyze, do not critique, do not greet, do not explain bugs. "
+                        f"Start with a verb (e.g. 'Computes...', 'Initializes...').\n\nMethod code:\n{method['code']}"
+                    )
+                    sys_prompt = "You are a concise codebase documentation generator. Output only a single sentence description starting with a verb."
                     summary = query_nvidia(prompt, sys_prompt)
-                    if "NVIDIA API Error" in summary:
+                    if (
+                        "NVIDIA API Error" in summary or 
+                        not summary or 
+                        len(summary) > 200 or 
+                        any(c in summary for c in ["不对", "incorrect", "This code", "koden", "Denne", "Norway", "Chinese", "Chinese:", "Norwegian:"])
+                    ):
                         summary = generate_fallback_summary(method)
                 else:
                     summary = generate_fallback_summary(method)
@@ -177,11 +190,22 @@ def build_meaningful_map(dirpath: str) -> list:
                     item["summary"] = cached_summary
                     continue
                     
-            if api_key:
-                prompt = f"Write a 1-sentence summary of what the python function '{item['name']}' does:\n\n{item['code']}"
-                sys_prompt = "You are a compiler that outputs a single short sentence explaining a function."
+            if item.get("docstring"):
+                summary = generate_fallback_summary(item)
+            elif api_key:
+                prompt = (
+                    f"Explain in one sentence what this python function '{item['name']}' does. "
+                    f"Output ONLY the explanation, do not analyze, do not critique, do not greet, do not explain bugs. "
+                    f"Start with a verb (e.g. 'Computes...', 'Initializes...').\n\nFunction code:\n{item['code']}"
+                )
+                sys_prompt = "You are a concise codebase documentation generator. Output only a single sentence description starting with a verb."
                 summary = query_nvidia(prompt, sys_prompt)
-                if "NVIDIA API Error" in summary:
+                if (
+                    "NVIDIA API Error" in summary or 
+                    not summary or 
+                    len(summary) > 200 or 
+                    any(c in summary for c in ["不对", "incorrect", "This code", "koden", "Denne", "Norway", "Chinese", "Chinese:", "Norwegian:"])
+                ):
                     summary = generate_fallback_summary(item)
             else:
                 summary = generate_fallback_summary(item)
@@ -223,6 +247,117 @@ def flatten_meaningful_map(meaningful_map: list) -> list:
                 "calls": item["calls"]
             })
     return flat_docs
+
+class CodebaseContextManager:
+    @staticmethod
+    def generate_global_skeleton(meaningful_map: list) -> str:
+        """Constructs a compact text outline of files, classes, and method signatures."""
+        lines = []
+        by_file = {}
+        for item in meaningful_map:
+            by_file.setdefault(item["file"], []).append(item)
+            
+        for filepath, items in sorted(by_file.items()):
+            lines.append(f"- {filepath}")
+            for item in items:
+                if item["type"] == "class":
+                    lines.append(f"  - class {item['name']}")
+                    for m in item["methods"]:
+                        sig = m["signature"].replace("def ", "").strip()
+                        lines.append(f"    - def {sig}")
+                elif item["type"] == "function":
+                    sig = item["signature"].replace("def ", "").strip()
+                    lines.append(f"  - def {sig}")
+        return "\n".join(lines)
+
+    @staticmethod
+    def _resolve_call_dependency(call_name: str, caller_class: str, flat_docs: list) -> dict:
+        """Resolves a call signature to its corresponding class method or standalone function."""
+        target_name = call_name
+        target_class = caller_class
+        
+        if call_name.startswith("self."):
+            target_name = call_name.split(".", 1)[1]
+        elif "." in call_name:
+            parts = call_name.split(".")
+            target_name = parts[-1]
+            
+        if target_class:
+            for doc in flat_docs:
+                if doc["class_name"] == target_class and doc["name"] == target_name:
+                    return doc
+                    
+        for doc in flat_docs:
+            if doc["class_name"] is None and doc["name"] == target_name:
+                return doc
+                
+        for doc in flat_docs:
+            if doc["name"] == target_name:
+                return doc
+                
+        return None
+
+    @classmethod
+    def retrieve_relevant_code(cls, matched_funcs: list, flat_docs: list) -> list:
+        """Retrieves matched search functions and expands context recursively with their call dependencies."""
+        evidence = []
+        evidence_keys = set()
+        
+        def add_to_evidence(doc):
+            key = (doc["file"], doc.get("class_name"), doc["name"])
+            if key not in evidence_keys:
+                evidence_keys.add(key)
+                evidence.append(doc)
+                
+        for doc in matched_funcs:
+            add_to_evidence(doc)
+            
+        dependencies_to_resolve = []
+        for doc in matched_funcs:
+            caller_class = doc.get("class_name")
+            for call in doc.get("calls", []):
+                dependencies_to_resolve.append((call, caller_class))
+                
+        for call_name, caller_class in dependencies_to_resolve:
+            dep_doc = cls._resolve_call_dependency(call_name, caller_class, flat_docs)
+            if dep_doc:
+                add_to_evidence(dep_doc)
+                
+        return evidence
+
+    @staticmethod
+    def construct_agentic_prompt(prompt: str, skeleton_str: str, evidence_docs: list) -> str:
+        """Constructs the structured XML agentic prompt for the LLM."""
+        code_context = "<evidence>\n"
+        for f in evidence_docs:
+            calls_json = json.dumps(f.get("calls", []))
+            if f["type"] == "method":
+                code_context += (
+                    f"  <method class=\"{f['class_name']}\" file=\"{f['file']}\" name=\"{f['name']}\" signature=\"{f['signature']}\">\n"
+                    f"    <summary>{f['summary']}</summary>\n"
+                    f"    <calls>{calls_json}</calls>\n"
+                    f"    <code>\n{f['code']}\n    </code>\n"
+                    f"  </method>\n"
+                )
+            else:
+                code_context += (
+                    f"  <function file=\"{f['file']}\" name=\"{f['name']}\" signature=\"{f['signature']}\">\n"
+                    f"    <summary>{f['summary']}</summary>\n"
+                    f"    <calls>{calls_json}</calls>\n"
+                    f"    <code>\n{f['code']}\n    </code>\n"
+                    f"  </function>\n"
+                )
+        code_context += "</evidence>"
+        
+        llm_prompt = (
+            f"You are an expert software engineer. Based on the following topological map of the codebase and full source code evidence, answer the user's question.\n\n"
+            f"<repository_map>\n{skeleton_str}\n</repository_map>\n\n"
+            f"{code_context}\n\n"
+            f"<user_question>\n{prompt}\n</user_question>\n\n"
+            f"Provide a clear, detailed, and accurate explanation."
+        )
+        return llm_prompt
+
 
 # ==========================================
 # THE SEARCH: TF-IDF SEMANTIC MATCHING
@@ -311,6 +446,10 @@ class CodeReviewerTool(BaseTool):
             search_engine = CodeSearchEngine(flat_docs)
             matched_funcs = search_engine.search(prompt, top_k=3)
             
+            # Generate Global Skeleton, Retrieve Code with Dependencies, and Construct Agentic Prompt
+            skeleton_str = CodebaseContextManager.generate_global_skeleton(meaningful_map)
+            evidence_docs = CodebaseContextManager.retrieve_relevant_code(matched_funcs, flat_docs)
+            
             header = f"[QA] [CodeReviewerTool QA Pipeline Activated] for codebase in: {os.path.basename(dir_to_scan)}\n"
             header += f"   -> Found {len(meaningful_map)} classes/functions in codebase.\n"
             if matched_funcs:
@@ -323,52 +462,43 @@ class CodeReviewerTool(BaseTool):
             else:
                 header += f"   -> No highly matching items identified for search query.\n"
                 
-            api_key = get_nvidia_api_key()
-            if api_key and matched_funcs:
-                code_context = "<codebase_context>\n"
-                for f in matched_funcs:
-                    calls_json = json.dumps(f.get("calls", []))
+            dependencies = [f for f in evidence_docs if f not in matched_funcs]
+            if dependencies:
+                header += "   -> Resolved call-graph dependencies:\n"
+                for f in dependencies:
                     if f["type"] == "method":
-                        code_context += (
-                            f"  <method class=\"{f['class_name']}\" file=\"{f['file']}\" name=\"{f['name']}\" signature=\"{f['signature']}\">\n"
-                            f"    <summary>{f['summary']}</summary>\n"
-                            f"    <calls>{calls_json}</calls>\n"
-                            f"    <code>\n{f['code']}\n    </code>\n"
-                            f"  </method>\n"
-                        )
+                        header += f"      + Dependency Method: {f['class_name']}.{f['name']} | File: {f['file']} | Summary: {f['summary']}\n"
                     else:
-                        code_context += (
-                            f"  <function file=\"{f['file']}\" name=\"{f['name']}\" signature=\"{f['signature']}\">\n"
-                            f"    <summary>{f['summary']}</summary>\n"
-                            f"    <calls>{calls_json}</calls>\n"
-                            f"    <code>\n{f['code']}\n    </code>\n"
-                            f"  </function>\n"
-                        )
-                code_context += "</codebase_context>"
-                
-                llm_prompt = (
-                    f"You are an expert software engineer. Based on the following source code context in XML, answer the user's question.\n\n"
-                    f"<user_question>\n{prompt}\n</user_question>\n\n"
-                    f"{code_context}\n\n"
-                    f"Provide a clear, detailed, and accurate explanation."
-                )
+                        header += f"      + Dependency Function: {f['name']} | File: {f['file']} | Summary: {f['summary']}\n"
+                        
+            api_key = get_nvidia_api_key()
+            analysis_res = None
+            if api_key and matched_funcs:
+                llm_prompt = CodebaseContextManager.construct_agentic_prompt(prompt, skeleton_str, evidence_docs)
                 sys_prompt = "You are a software architect explaining system design based on function implementations."
                 
-                analysis_res = query_nvidia(llm_prompt, sys_prompt)
-                output = f"{header}\n--- Final Analysis (NVIDIA NIM) ---\n{analysis_res}"
-            else:
+                res = query_nvidia(llm_prompt, sys_prompt)
+                if "NVIDIA API Error" not in res:
+                    analysis_res = res
+                    output = f"{header}\n--- Final Analysis (NVIDIA NIM) ---\n{analysis_res}"
+                else:
+                    header += f"   -> [Warning] NVIDIA NIM call failed: {res}\n"
+                    
+            if not analysis_res:
                 fallback_res = ""
                 if not api_key:
-                    fallback_res += "   -> Note: NVIDIA_API_KEY is not set. Displaying matching items directly:\n\n"
+                    fallback_res += "   -> Note: NVIDIA_API_KEY is not set. Displaying matching items and dependencies directly:\n\n"
                 else:
-                    fallback_res += "   -> Note: Displaying matching items directly:\n\n"
+                    fallback_res += "   -> Note: Falling back to direct code display:\n\n"
                 
-                for f in matched_funcs:
+                for f in evidence_docs:
                     calls_str = ", ".join(f.get("calls", []))
+                    is_dep = f not in matched_funcs
+                    dep_suffix = " (Dependency)" if is_dep else ""
                     if f["type"] == "method":
-                        fallback_res += f"*** Method: {f['class_name']}.{f['name']} | {f['signature']} | Calls: [{calls_str}] ***\n{f['code']}\n" + "="*50 + "\n"
+                        fallback_res += f"*** Method: {f['class_name']}.{f['name']} | {f['signature']} | Calls: [{calls_str}]{dep_suffix} ***\n{f['code']}\n" + "="*50 + "\n"
                     else:
-                        fallback_res += f"*** Function: {f['name']} | {f['signature']} | Calls: [{calls_str}] ***\n{f['code']}\n" + "="*50 + "\n"
+                        fallback_res += f"*** Function: {f['name']} | {f['signature']} | Calls: [{calls_str}]{dep_suffix} ***\n{f['code']}\n" + "="*50 + "\n"
                 output = f"{header}\n{fallback_res}"
                 
         elif is_arch_request:

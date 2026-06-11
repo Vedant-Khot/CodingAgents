@@ -35,7 +35,7 @@
         ],
         "file": "router.py",
         "hash": "122237440a60024a1abde4b5908c1eee",
-        "summary": "  init   in router.py."
+        "summary": "Init in router.py."
       },
       {
         "name": "matches",
@@ -71,7 +71,7 @@
         ],
         "file": "router.py",
         "hash": "1942548ae617db578e37836813da8528",
-        "summary": "  init   in router.py."
+        "summary": "Init in router.py."
       },
       {
         "name": "_build",
@@ -90,7 +90,7 @@
         ],
         "file": "router.py",
         "hash": "acb2ba1fd41521fc258b051a09e4d43f",
-        "summary": " build in router.py."
+        "summary": "Build in router.py."
       },
       {
         "name": "_vectorize",
@@ -106,7 +106,7 @@
         ],
         "file": "router.py",
         "hash": "4f2148aa2f5b60b409827d80d320317f",
-        "summary": " vectorize in router.py."
+        "summary": "Vectorize in router.py."
       },
       {
         "name": "get_similarities",
@@ -148,7 +148,7 @@
         ],
         "file": "router.py",
         "hash": "438f418c311c80450afce722c805a2d6",
-        "summary": "  init   in router.py."
+        "summary": "Init in router.py."
       },
       {
         "name": "_setup_rules",
@@ -161,7 +161,7 @@
         ],
         "file": "router.py",
         "hash": "df24e99dd4e1cc248ee1787511f6ff89",
-        "summary": " setup rules in router.py."
+        "summary": "Setup rules in router.py."
       },
       {
         "name": "add_rule",
@@ -185,7 +185,7 @@
         ],
         "file": "router.py",
         "hash": "4a4eac10eb6b19fb47a89784645f498a",
-        "summary": " setup exemplars in router.py."
+        "summary": "Setup exemplars in router.py."
       },
       {
         "name": "route",
@@ -227,7 +227,7 @@
         ],
         "file": "router.py",
         "hash": "90a6a872b60953e16c2bb61070566d68",
-        "summary": "  init   in router.py."
+        "summary": "Init in router.py."
       },
       {
         "name": "_register_tools",
@@ -249,7 +249,7 @@
         ],
         "file": "router.py",
         "hash": "b2eee8a2b250b85ba723f21e6e025cd0",
-        "summary": " register tools in router.py."
+        "summary": "Register tools in router.py."
       },
       {
         "name": "get_tool_for_intent",
@@ -281,6 +281,63 @@
         "summary": "Process and execute in router.py."
       }
     ]
+  },
+  {
+    "type": "function",
+    "name": "generate_fallback_summary",
+    "file": "cleanup_map.py",
+    "filepath": "C:\\Users\\Admin\\OneDrive\\Documents\\Coding Agents\\scratch\\cleanup_map.py",
+    "signature": "def generate_fallback_summary(name, docstring, file_name)",
+    "docstring": "",
+    "code": "def generate_fallback_summary(name, docstring, file_name):\n    doc = docstring.strip().split(\"\\n\")[0] if docstring else \"\"\n    if doc:\n        return doc\n    words = [w for w in name.split(\"_\") if w]\n    if not words:\n        words = [name]\n    words[0] = words[0].capitalize()\n    return f\"{words[0]} {' '.join(words[1:])} in {file_name}.\".replace(\"  \", \" \").strip()",
+    "calls": [
+      "words[0].capitalize",
+      "f\"{words[0]} {' '.join(words[1:])} in {file_name}.\".replace('  ', ' ').strip",
+      "docstring.strip().split",
+      "name.split",
+      "f\"{words[0]} {' '.join(words[1:])} in {file_name}.\".replace",
+      "docstring.strip",
+      "' '.join"
+    ],
+    "hash": "ba5ec488f2e01112c6c6ad470b57611d",
+    "summary": "Generate fallback summary in cleanup_map.py."
+  },
+  {
+    "type": "function",
+    "name": "main",
+    "file": "cleanup_map.py",
+    "filepath": "C:\\Users\\Admin\\OneDrive\\Documents\\Coding Agents\\scratch\\cleanup_map.py",
+    "signature": "def main()",
+    "docstring": "",
+    "code": "def main():\n    map_path = \"repo_meaningful_map.json\"\n    if not os.path.exists(map_path):\n        print(\"Map file not found.\")\n        return\n        \n    with open(map_path, \"r\", encoding=\"utf-8\") as f:\n        data = json.load(f)\n        \n    cleaned_count = 0\n    for item in data:\n        file_name = item.get(\"file\", \"unknown\")\n        if item.get(\"type\") == \"class\":\n            for m in item.get(\"methods\", []):\n                old_summary = m.get(\"summary\", \"\")\n                new_summary = generate_fallback_summary(m[\"name\"], m.get(\"docstring\"), file_name)\n                # If the old summary was long (probably garbage LLM response) or containing non-ascii/Norwegian/Chinese, clean it.\n                # Let's just reset all summaries to fallback unless they are already clean and short.\n                # Actually, resetting them to fallback/docstring is safer and cleaner.\n                m[\"summary\"] = new_summary\n                cleaned_count += 1\n        elif item.get(\"type\") == \"function\":\n            old_summary = item.get(\"summary\", \"\")\n            new_summary = generate_fallback_summary(item[\"name\"], item.get(\"docstring\"), file_name)\n            item[\"summary\"] = new_summary\n            cleaned_count += 1\n            \n    with open(map_path, \"w\", encoding=\"utf-8\") as f:\n        json.dump(data, f, indent=2)\n        \n    print(f\"Cleaned {cleaned_count} summaries in {map_path}.\")",
+    "calls": [
+      "print",
+      "os.path.exists",
+      "open",
+      "json.load",
+      "item.get",
+      "json.dump",
+      "m.get",
+      "generate_fallback_summary"
+    ],
+    "hash": "3dfc7cb3663cd803496794d3941d3aed",
+    "summary": "Main in cleanup_map.py."
+  },
+  {
+    "type": "function",
+    "name": "main",
+    "file": "test_context_manager.py",
+    "filepath": "C:\\Users\\Admin\\OneDrive\\Documents\\Coding Agents\\scratch\\test_context_manager.py",
+    "signature": "def main()",
+    "docstring": "",
+    "code": "def main():\n    print(\"=== Testing CodebaseContextManager integration inside CodeReviewerTool ===\")\n    \n    # 1. Instantiate tool\n    tool = CodeReviewerTool(\"code_reviewer\", \"Code Reviewer Tool\")\n    \n    # 2. Define prompt\n    prompt = \"How does word splitting or tokenization work in this project?\"\n    \n    # 3. Run tool execute (using low_levels containing 'Codebase QA')\n    print(f\"Running execute() for prompt: '{prompt}'\")\n    output = tool.execute(prompt, [\"Codebase QA\"])\n    \n    print(\"\\n=== Tool Output ===\")\n    print(output)\n    print(\"===================\\n\")",
+    "calls": [
+      "print",
+      "CodeReviewerTool",
+      "tool.execute"
+    ],
+    "hash": "91fb18be0f24605789836a0c8501ed2f",
+    "summary": "Main in test_context_manager.py."
   },
   {
     "type": "function",
@@ -376,7 +433,7 @@
         "calls": [],
         "file": "base.py",
         "hash": "904bddc7b244e84e0b329fb163192054",
-        "summary": "  init   in base.py."
+        "summary": "Init in base.py."
       },
       {
         "name": "execute",
@@ -510,15 +567,15 @@
     "filepath": "C:\\Users\\Admin\\OneDrive\\Documents\\Coding Agents\\tools\\code_reviewer.py",
     "signature": "def generate_fallback_summary(func: dict) -> str",
     "docstring": "",
-    "code": "def generate_fallback_summary(func: dict) -> str:\n    doc = func[\"docstring\"].strip().split(\"\\n\")[0] if func[\"docstring\"] else \"\"\n    if doc:\n        return doc\n    words = func[\"name\"].split(\"_\")\n    words[0] = words[0].capitalize()\n    return f\"{' '.join(words)} in {func['file']}.\"",
+    "code": "def generate_fallback_summary(func: dict) -> str:\n    doc = func[\"docstring\"].strip().split(\"\\n\")[0] if func[\"docstring\"] else \"\"\n    if doc:\n        return doc\n    words = [w for w in func[\"name\"].split(\"_\") if w]\n    if not words:\n        words = [func[\"name\"]]\n    words[0] = words[0].capitalize()\n    return f\"{' '.join(words)} in {func['file']}.\"",
     "calls": [
-      "func['name'].split",
       "words[0].capitalize",
       "func['docstring'].strip().split",
+      "func['name'].split",
       "' '.join",
       "func['docstring'].strip"
     ],
-    "hash": "cf66323c9d2390b49981a6398fef1ef1",
+    "hash": "7ffffb1e8fc2eedab0a1c7fb4cb12d17",
     "summary": "Generate fallback summary in code_reviewer.py."
   },
   {
@@ -528,7 +585,7 @@
     "filepath": "C:\\Users\\Admin\\OneDrive\\Documents\\Coding Agents\\tools\\code_reviewer.py",
     "signature": "def build_meaningful_map(dirpath: str) -> list",
     "docstring": "",
-    "code": "def build_meaningful_map(dirpath: str) -> list:\n    ignored_dirs = {'.git', '__pycache__', '.gemini', 'venv', '.venv', 'env', '.env', 'build', 'dist'}\n    all_items = []\n    \n    for root, dirs, files in os.walk(dirpath):\n        dirs[:] = [d for d in dirs if d not in ignored_dirs]\n        for f in files:\n            if f.endswith(\".py\"):\n                filepath = os.path.join(root, f)\n                all_items.extend(scan_file_structure(filepath))\n                \n    cache_path = os.path.join(dirpath, \"repo_meaningful_map.json\")\n    cache_map = {}\n    if os.path.exists(cache_path):\n        try:\n            with open(cache_path, \"r\", encoding=\"utf-8\") as f:\n                cached_data = json.load(f)\n                for item in cached_data:\n                    file_name = item.get(\"file\")\n                    if item.get(\"type\") == \"class\":\n                        for method in item.get(\"methods\", []):\n                            cache_map[(file_name, item.get(\"name\"), method.get(\"name\"))] = (method.get(\"summary\", \"\"), method.get(\"hash\", \"\"))\n                    elif item.get(\"type\") == \"function\":\n                        cache_map[(file_name, None, item.get(\"name\"))] = (item.get(\"summary\", \"\"), item.get(\"hash\", \"\"))\n        except Exception:\n            pass\n            \n    api_key = get_nvidia_api_key()\n    import hashlib\n    \n    for item in all_items:\n        file_name = item[\"file\"]\n        if item[\"type\"] == \"class\":\n            class_name = item[\"name\"]\n            for method in item[\"methods\"]:\n                m_hash = hashlib.md5(method[\"code\"].encode(\"utf-8\")).hexdigest()\n                method[\"hash\"] = m_hash\n                \n                cache_key = (file_name, class_name, method[\"name\"])\n                if cache_key in cache_map:\n                    cached_summary, cached_hash = cache_map[cache_key]\n                    if cached_summary and cached_hash == m_hash:\n                        method[\"summary\"] = cached_summary\n                        continue\n                        \n                if api_key:\n                    prompt = f\"Write a 1-sentence summary of what the class method '{class_name}.{method['name']}' does:\\n\\n{method['code']}\"\n                    sys_prompt = \"You are a compiler that outputs a single short sentence explaining a class method.\"\n                    summary = query_nvidia(prompt, sys_prompt)\n                    if \"NVIDIA API Error\" in summary:\n                        summary = generate_fallback_summary(method)\n                else:\n                    summary = generate_fallback_summary(method)\n                method[\"summary\"] = summary\n                \n        elif item[\"type\"] == \"function\":\n            func_hash = hashlib.md5(item[\"code\"].encode(\"utf-8\")).hexdigest()\n            item[\"hash\"] = func_hash\n            \n            cache_key = (file_name, None, item[\"name\"])\n            if cache_key in cache_map:\n                cached_summary, cached_hash = cache_map[cache_key]\n                if cached_summary and cached_hash == func_hash:\n                    item[\"summary\"] = cached_summary\n                    continue\n                    \n            if api_key:\n                prompt = f\"Write a 1-sentence summary of what the python function '{item['name']}' does:\\n\\n{item['code']}\"\n                sys_prompt = \"You are a compiler that outputs a single short sentence explaining a function.\"\n                summary = query_nvidia(prompt, sys_prompt)\n                if \"NVIDIA API Error\" in summary:\n                    summary = generate_fallback_summary(item)\n            else:\n                summary = generate_fallback_summary(item)\n            item[\"summary\"] = summary\n            \n    try:\n        with open(cache_path, \"w\", encoding=\"utf-8\") as f:\n            json.dump(all_items, f, indent=2)\n    except Exception:\n        pass\n        \n    return all_items",
+    "code": "def build_meaningful_map(dirpath: str) -> list:\n    ignored_dirs = {'.git', '__pycache__', '.gemini', 'venv', '.venv', 'env', '.env', 'build', 'dist'}\n    all_items = []\n    \n    for root, dirs, files in os.walk(dirpath):\n        dirs[:] = [d for d in dirs if d not in ignored_dirs]\n        for f in files:\n            if f.endswith(\".py\"):\n                filepath = os.path.join(root, f)\n                all_items.extend(scan_file_structure(filepath))\n                \n    cache_path = os.path.join(dirpath, \"repo_meaningful_map.json\")\n    cache_map = {}\n    if os.path.exists(cache_path):\n        try:\n            with open(cache_path, \"r\", encoding=\"utf-8\") as f:\n                cached_data = json.load(f)\n                for item in cached_data:\n                    file_name = item.get(\"file\")\n                    if item.get(\"type\") == \"class\":\n                        for method in item.get(\"methods\", []):\n                            cache_map[(file_name, item.get(\"name\"), method.get(\"name\"))] = (method.get(\"summary\", \"\"), method.get(\"hash\", \"\"))\n                    elif item.get(\"type\") == \"function\":\n                        cache_map[(file_name, None, item.get(\"name\"))] = (item.get(\"summary\", \"\"), item.get(\"hash\", \"\"))\n        except Exception:\n            pass\n            \n    api_key = get_nvidia_api_key()\n    import hashlib\n    \n    for item in all_items:\n        file_name = item[\"file\"]\n        if item[\"type\"] == \"class\":\n            class_name = item[\"name\"]\n            for method in item[\"methods\"]:\n                m_hash = hashlib.md5(method[\"code\"].encode(\"utf-8\")).hexdigest()\n                method[\"hash\"] = m_hash\n                \n                cache_key = (file_name, class_name, method[\"name\"])\n                if cache_key in cache_map:\n                    cached_summary, cached_hash = cache_map[cache_key]\n                    if cached_summary and cached_hash == m_hash:\n                        method[\"summary\"] = cached_summary\n                        continue\n                        \n                if method.get(\"docstring\"):\n                    summary = generate_fallback_summary(method)\n                elif api_key:\n                    prompt = (\n                        f\"Explain in one sentence what this python method '{class_name}.{method['name']}' does. \"\n                        f\"Output ONLY the explanation, do not analyze, do not critique, do not greet, do not explain bugs. \"\n                        f\"Start with a verb (e.g. 'Computes...', 'Initializes...').\\n\\nMethod code:\\n{method['code']}\"\n                    )\n                    sys_prompt = \"You are a concise codebase documentation generator. Output only a single sentence description starting with a verb.\"\n                    summary = query_nvidia(prompt, sys_prompt)\n                    if (\n                        \"NVIDIA API Error\" in summary or \n                        not summary or \n                        len(summary) > 200 or \n                        any(c in summary for c in [\"\u4e0d\u5bf9\", \"incorrect\", \"This code\", \"koden\", \"Denne\", \"Norway\", \"Chinese\", \"Chinese:\", \"Norwegian:\"])\n                    ):\n                        summary = generate_fallback_summary(method)\n                else:\n                    summary = generate_fallback_summary(method)\n                method[\"summary\"] = summary\n                \n        elif item[\"type\"] == \"function\":\n            func_hash = hashlib.md5(item[\"code\"].encode(\"utf-8\")).hexdigest()\n            item[\"hash\"] = func_hash\n            \n            cache_key = (file_name, None, item[\"name\"])\n            if cache_key in cache_map:\n                cached_summary, cached_hash = cache_map[cache_key]\n                if cached_summary and cached_hash == func_hash:\n                    item[\"summary\"] = cached_summary\n                    continue\n                    \n            if item.get(\"docstring\"):\n                summary = generate_fallback_summary(item)\n            elif api_key:\n                prompt = (\n                    f\"Explain in one sentence what this python function '{item['name']}' does. \"\n                    f\"Output ONLY the explanation, do not analyze, do not critique, do not greet, do not explain bugs. \"\n                    f\"Start with a verb (e.g. 'Computes...', 'Initializes...').\\n\\nFunction code:\\n{item['code']}\"\n                )\n                sys_prompt = \"You are a concise codebase documentation generator. Output only a single sentence description starting with a verb.\"\n                summary = query_nvidia(prompt, sys_prompt)\n                if (\n                    \"NVIDIA API Error\" in summary or \n                    not summary or \n                    len(summary) > 200 or \n                    any(c in summary for c in [\"\u4e0d\u5bf9\", \"incorrect\", \"This code\", \"koden\", \"Denne\", \"Norway\", \"Chinese\", \"Chinese:\", \"Norwegian:\"])\n                ):\n                    summary = generate_fallback_summary(item)\n            else:\n                summary = generate_fallback_summary(item)\n            item[\"summary\"] = summary\n            \n    try:\n        with open(cache_path, \"w\", encoding=\"utf-8\") as f:\n            json.dump(all_items, f, indent=2)\n    except Exception:\n        pass\n        \n    return all_items",
     "calls": [
       "os.walk",
       "os.path.join",
@@ -540,17 +597,19 @@
       "all_items.extend",
       "json.load",
       "hashlib.md5(method['code'].encode('utf-8')).hexdigest",
+      "method.get",
       "hashlib.md5(item['code'].encode('utf-8')).hexdigest",
-      "scan_file_structure",
       "item.get",
-      "query_nvidia",
+      "scan_file_structure",
       "generate_fallback_summary",
       "hashlib.md5",
+      "query_nvidia",
       "method['code'].encode",
+      "any",
       "item['code'].encode",
-      "method.get"
+      "len"
     ],
-    "hash": "2cc9a569bca43d9e2720d303faa7bd14",
+    "hash": "671d34cdc20c12b473ea6e19c521bdf7",
     "summary": "Build meaningful map in code_reviewer.py."
   },
   {
@@ -566,6 +625,81 @@
     ],
     "hash": "ab03e70bee0d6f0d8585d452959f9fad",
     "summary": "Flattens the structured classes and functions map into separate document dicts for the search engine."
+  },
+  {
+    "type": "class",
+    "name": "CodebaseContextManager",
+    "file": "code_reviewer.py",
+    "filepath": "C:\\Users\\Admin\\OneDrive\\Documents\\Coding Agents\\tools\\code_reviewer.py",
+    "bases": [],
+    "docstring": "",
+    "methods": [
+      {
+        "name": "generate_global_skeleton",
+        "signature": "def generate_global_skeleton(meaningful_map: list) -> str",
+        "docstring": "Constructs a compact text outline of files, classes, and method signatures.",
+        "code": "    def generate_global_skeleton(meaningful_map: list) -> str:\n        \"\"\"Constructs a compact text outline of files, classes, and method signatures.\"\"\"\n        lines = []\n        by_file = {}\n        for item in meaningful_map:\n            by_file.setdefault(item[\"file\"], []).append(item)\n            \n        for filepath, items in sorted(by_file.items()):\n            lines.append(f\"- {filepath}\")\n            for item in items:\n                if item[\"type\"] == \"class\":\n                    lines.append(f\"  - class {item['name']}\")\n                    for m in item[\"methods\"]:\n                        sig = m[\"signature\"].replace(\"def \", \"\").strip()\n                        lines.append(f\"    - def {sig}\")\n                elif item[\"type\"] == \"function\":\n                    sig = item[\"signature\"].replace(\"def \", \"\").strip()\n                    lines.append(f\"  - def {sig}\")\n        return \"\\n\".join(lines)",
+        "calls": [
+          "sorted",
+          "'\\n'.join",
+          "by_file.setdefault(item['file'], []).append",
+          "by_file.items",
+          "lines.append",
+          "by_file.setdefault",
+          "m['signature'].replace('def ', '').strip",
+          "item['signature'].replace('def ', '').strip",
+          "m['signature'].replace",
+          "item['signature'].replace"
+        ],
+        "file": "code_reviewer.py",
+        "hash": "f289e1c23a56fda9a94479d3d8eac900",
+        "summary": "Constructs a compact text outline of files, classes, and method signatures."
+      },
+      {
+        "name": "_resolve_call_dependency",
+        "signature": "def _resolve_call_dependency(call_name: str, caller_class: str, flat_docs: list) -> dict",
+        "docstring": "Resolves a call signature to its corresponding class method or standalone function.",
+        "code": "    def _resolve_call_dependency(call_name: str, caller_class: str, flat_docs: list) -> dict:\n        \"\"\"Resolves a call signature to its corresponding class method or standalone function.\"\"\"\n        target_name = call_name\n        target_class = caller_class\n        \n        if call_name.startswith(\"self.\"):\n            target_name = call_name.split(\".\", 1)[1]\n        elif \".\" in call_name:\n            parts = call_name.split(\".\")\n            target_name = parts[-1]\n            \n        if target_class:\n            for doc in flat_docs:\n                if doc[\"class_name\"] == target_class and doc[\"name\"] == target_name:\n                    return doc\n                    \n        for doc in flat_docs:\n            if doc[\"class_name\"] is None and doc[\"name\"] == target_name:\n                return doc\n                \n        for doc in flat_docs:\n            if doc[\"name\"] == target_name:\n                return doc\n                \n        return None",
+        "calls": [
+          "call_name.startswith",
+          "call_name.split"
+        ],
+        "file": "code_reviewer.py",
+        "hash": "d88a13af55fbbbe799f50d62f091442f",
+        "summary": "Resolves a call signature to its corresponding class method or standalone function."
+      },
+      {
+        "name": "retrieve_relevant_code",
+        "signature": "def retrieve_relevant_code(cls, matched_funcs: list, flat_docs: list) -> list",
+        "docstring": "Retrieves matched search functions and expands context recursively with their call dependencies.",
+        "code": "    def retrieve_relevant_code(cls, matched_funcs: list, flat_docs: list) -> list:\n        \"\"\"Retrieves matched search functions and expands context recursively with their call dependencies.\"\"\"\n        evidence = []\n        evidence_keys = set()\n        \n        def add_to_evidence(doc):\n            key = (doc[\"file\"], doc.get(\"class_name\"), doc[\"name\"])\n            if key not in evidence_keys:\n                evidence_keys.add(key)\n                evidence.append(doc)\n                \n        for doc in matched_funcs:\n            add_to_evidence(doc)\n            \n        dependencies_to_resolve = []\n        for doc in matched_funcs:\n            caller_class = doc.get(\"class_name\")\n            for call in doc.get(\"calls\", []):\n                dependencies_to_resolve.append((call, caller_class))\n                \n        for call_name, caller_class in dependencies_to_resolve:\n            dep_doc = cls._resolve_call_dependency(call_name, caller_class, flat_docs)\n            if dep_doc:\n                add_to_evidence(dep_doc)\n                \n        return evidence",
+        "calls": [
+          "set",
+          "add_to_evidence",
+          "doc.get",
+          "cls._resolve_call_dependency",
+          "evidence_keys.add",
+          "evidence.append",
+          "dependencies_to_resolve.append"
+        ],
+        "file": "code_reviewer.py",
+        "hash": "c27816298bbc8e6e18b5607e8510688f",
+        "summary": "Retrieves matched search functions and expands context recursively with their call dependencies."
+      },
+      {
+        "name": "construct_agentic_prompt",
+        "signature": "def construct_agentic_prompt(prompt: str, skeleton_str: str, evidence_docs: list) -> str",
+        "docstring": "Constructs the structured XML agentic prompt for the LLM.",
+        "code": "    def construct_agentic_prompt(prompt: str, skeleton_str: str, evidence_docs: list) -> str:\n        \"\"\"Constructs the structured XML agentic prompt for the LLM.\"\"\"\n        code_context = \"<evidence>\\n\"\n        for f in evidence_docs:\n            calls_json = json.dumps(f.get(\"calls\", []))\n            if f[\"type\"] == \"method\":\n                code_context += (\n                    f\"  <method class=\\\"{f['class_name']}\\\" file=\\\"{f['file']}\\\" name=\\\"{f['name']}\\\" signature=\\\"{f['signature']}\\\">\\n\"\n                    f\"    <summary>{f['summary']}</summary>\\n\"\n                    f\"    <calls>{calls_json}</calls>\\n\"\n                    f\"    <code>\\n{f['code']}\\n    </code>\\n\"\n                    f\"  </method>\\n\"\n                )\n            else:\n                code_context += (\n                    f\"  <function file=\\\"{f['file']}\\\" name=\\\"{f['name']}\\\" signature=\\\"{f['signature']}\\\">\\n\"\n                    f\"    <summary>{f['summary']}</summary>\\n\"\n                    f\"    <calls>{calls_json}</calls>\\n\"\n                    f\"    <code>\\n{f['code']}\\n    </code>\\n\"\n                    f\"  </function>\\n\"\n                )\n        code_context += \"</evidence>\"\n        \n        llm_prompt = (\n            f\"You are an expert software engineer. Based on the following topological map of the codebase and full source code evidence, answer the user's question.\\n\\n\"\n            f\"<repository_map>\\n{skeleton_str}\\n</repository_map>\\n\\n\"\n            f\"{code_context}\\n\\n\"\n            f\"<user_question>\\n{prompt}\\n</user_question>\\n\\n\"\n            f\"Provide a clear, detailed, and accurate explanation.\"\n        )\n        return llm_prompt",
+        "calls": [
+          "json.dumps",
+          "f.get"
+        ],
+        "file": "code_reviewer.py",
+        "hash": "b61e3ab1f195e93c1aa0a3197931d145",
+        "summary": "Constructs the structured XML agentic prompt for the LLM."
+      }
+    ]
   },
   {
     "type": "class",
@@ -586,7 +720,7 @@
         ],
         "file": "code_reviewer.py",
         "hash": "c5328b4e691adc9107df85eed40a2443",
-        "summary": "  init   in code_reviewer.py."
+        "summary": "Init in code_reviewer.py."
       },
       {
         "name": "_build",
@@ -605,7 +739,7 @@
         ],
         "file": "code_reviewer.py",
         "hash": "00c60c54fad64286d2bfef4a5d962598",
-        "summary": " build in code_reviewer.py."
+        "summary": "Build in code_reviewer.py."
       },
       {
         "name": "_vectorize",
@@ -621,7 +755,7 @@
         ],
         "file": "code_reviewer.py",
         "hash": "8b6d42f59a51d1bacbbac5100d0f7f8f",
-        "summary": " vectorize in code_reviewer.py."
+        "summary": "Vectorize in code_reviewer.py."
       },
       {
         "name": "search",
@@ -658,7 +792,7 @@
         "name": "execute",
         "signature": "def execute(self, prompt: str, low_levels: List[str]) -> str",
         "docstring": "",
-        "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        target = \".\"\n        words = re.findall(r'[a-zA-Z0-9_\\.\\-\\/\\\\:]+', prompt)\n        for word in words:\n            if os.path.exists(word):\n                target = word\n                break\n                \n        target_abs = os.path.abspath(target)\n        \n        is_qa_request = \"Codebase QA\" in low_levels or any(\n            kw in prompt.lower() for kw in [\"our codebase\", \"this codebase\", \"this project\", \"in this repository\", \"how does our\", \"explain our\", \"how does the codebase\", \"how is our\", \"where does our\"]\n        )\n        is_arch_request = \"Architecture Review\" in low_levels or any(\n            kw in prompt.lower() for kw in [\"skeleton\", \"skeletonize\", \"repomix\", \"pack\", \"map\", \"structure\"]\n        )\n        \n        if is_qa_request:\n            dir_to_scan = target_abs if os.path.isdir(target_abs) else os.path.dirname(target_abs)\n            meaningful_map = build_meaningful_map(dir_to_scan)\n            \n            # Flatten for search\n            flat_docs = flatten_meaningful_map(meaningful_map)\n            \n            search_engine = CodeSearchEngine(flat_docs)\n            matched_funcs = search_engine.search(prompt, top_k=3)\n            \n            header = f\"[QA] [CodeReviewerTool QA Pipeline Activated] for codebase in: {os.path.basename(dir_to_scan)}\\n\"\n            header += f\"   -> Found {len(meaningful_map)} classes/functions in codebase.\\n\"\n            if matched_funcs:\n                header += f\"   -> Identified {len(matched_funcs)} items matching query:\\n\"\n                for f in matched_funcs:\n                    if f[\"type\"] == \"method\":\n                        header += f\"      * Method: {f['class_name']}.{f['name']} | File: {f['file']} | Signature: {f['signature']} | Summary: {f['summary']}\\n\"\n                    else:\n                        header += f\"      * Function: {f['name']} | File: {f['file']} | Signature: {f['signature']} | Summary: {f['summary']}\\n\"\n            else:\n                header += f\"   -> No highly matching items identified for search query.\\n\"\n                \n            api_key = get_nvidia_api_key()\n            if api_key and matched_funcs:\n                code_context = \"<codebase_context>\\n\"\n                for f in matched_funcs:\n                    calls_json = json.dumps(f.get(\"calls\", []))\n                    if f[\"type\"] == \"method\":\n                        code_context += (\n                            f\"  <method class=\\\"{f['class_name']}\\\" file=\\\"{f['file']}\\\" name=\\\"{f['name']}\\\" signature=\\\"{f['signature']}\\\">\\n\"\n                            f\"    <summary>{f['summary']}</summary>\\n\"\n                            f\"    <calls>{calls_json}</calls>\\n\"\n                            f\"    <code>\\n{f['code']}\\n    </code>\\n\"\n                            f\"  </method>\\n\"\n                        )\n                    else:\n                        code_context += (\n                            f\"  <function file=\\\"{f['file']}\\\" name=\\\"{f['name']}\\\" signature=\\\"{f['signature']}\\\">\\n\"\n                            f\"    <summary>{f['summary']}</summary>\\n\"\n                            f\"    <calls>{calls_json}</calls>\\n\"\n                            f\"    <code>\\n{f['code']}\\n    </code>\\n\"\n                            f\"  </function>\\n\"\n                        )\n                code_context += \"</codebase_context>\"\n                \n                llm_prompt = (\n                    f\"You are an expert software engineer. Based on the following source code context in XML, answer the user's question.\\n\\n\"\n                    f\"<user_question>\\n{prompt}\\n</user_question>\\n\\n\"\n                    f\"{code_context}\\n\\n\"\n                    f\"Provide a clear, detailed, and accurate explanation.\"\n                )\n                sys_prompt = \"You are a software architect explaining system design based on function implementations.\"\n                \n                analysis_res = query_nvidia(llm_prompt, sys_prompt)\n                output = f\"{header}\\n--- Final Analysis (NVIDIA NIM) ---\\n{analysis_res}\"\n            else:\n                fallback_res = \"\"\n                if not api_key:\n                    fallback_res += \"   -> Note: NVIDIA_API_KEY is not set. Displaying matching items directly:\\n\\n\"\n                else:\n                    fallback_res += \"   -> Note: Displaying matching items directly:\\n\\n\"\n                \n                for f in matched_funcs:\n                    calls_str = \", \".join(f.get(\"calls\", []))\n                    if f[\"type\"] == \"method\":\n                        fallback_res += f\"*** Method: {f['class_name']}.{f['name']} | {f['signature']} | Calls: [{calls_str}] ***\\n{f['code']}\\n\" + \"=\"*50 + \"\\n\"\n                    else:\n                        fallback_res += f\"*** Function: {f['name']} | {f['signature']} | Calls: [{calls_str}] ***\\n{f['code']}\\n\" + \"=\"*50 + \"\\n\"\n                output = f\"{header}\\n{fallback_res}\"\n                \n        elif is_arch_request:\n            if os.path.isfile(target_abs):\n                return f\"[DESIGN] [CodeReviewerTool Activated] Codebase Skeletonizer target must be a directory. Target specified is a file: {os.path.basename(target_abs)}\"\n            \n            output_xml = self._generate_skeleton_xml(target_abs)\n            output_file = os.path.join(target_abs, \"repo_skeleton.xml\")\n            try:\n                with open(output_file, \"w\", encoding=\"utf-8\") as f:\n                    f.write(output_xml)\n                status_str = f\"Saved XML context map to: {output_file}\"\n            except Exception as e:\n                status_str = f\"Failed to save XML context file: {str(e)}\"\n                \n            preview_lines = output_xml.splitlines()[:25]\n            preview = \"\\n\".join([\"      \" + l for l in preview_lines])\n            \n            report = [\n                f\"[DESIGN] [CodeReviewerTool Activated] Codebase Skeletonizer completed for: {os.path.basename(target_abs)}\",\n                f\"   -> Status: {status_str}\",\n                f\"   -> XML Preview (First 25 lines):\",\n                preview,\n                f\"      ... (XML file truncated, check '{os.path.basename(output_file)}' for full content)\"\n            ]\n            output = \"\\n\".join(report)\n        else:\n            if os.path.isfile(target_abs):\n                res = self.analyze_file(target_abs)\n                report = [\n                    f\"[REVIEW] [CodeReviewerTool Activated] File Analysis for: {os.path.basename(target_abs)}\",\n                    f\"   -> Total Lines: {res['lines']}\",\n                    f\"   -> Classes: {res['classes']}\",\n                    f\"   -> Functions: {res['functions']}\",\n                    f\"   -> Security Alerts ({len(res['security_issues'])}):\",\n                ]\n                if res['security_issues']:\n                    for iss in res['security_issues']:\n                        report.append(f\"      [!] {iss}\")\n                else:\n                    report.append(\"      No security threats found.\")\n                    \n                report.append(f\"   -> Readability Recommendations ({len(res['style_issues'])}):\")\n                if res['style_issues']:\n                    for iss in res['style_issues']:\n                        report.append(f\"      [*] {iss}\")\n                else:\n                    report.append(\"      Style conventions followed.\")\n                \n                output = \"\\n\".join(report)\n            else:\n                output = self.analyze_codebase(target_abs)\n            \n        return output.encode('ascii', 'ignore').decode('ascii')",
+        "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        target = \".\"\n        words = re.findall(r'[a-zA-Z0-9_\\.\\-\\/\\\\:]+', prompt)\n        for word in words:\n            if os.path.exists(word):\n                target = word\n                break\n                \n        target_abs = os.path.abspath(target)\n        \n        is_qa_request = \"Codebase QA\" in low_levels or any(\n            kw in prompt.lower() for kw in [\"our codebase\", \"this codebase\", \"this project\", \"in this repository\", \"how does our\", \"explain our\", \"how does the codebase\", \"how is our\", \"where does our\"]\n        )\n        is_arch_request = \"Architecture Review\" in low_levels or any(\n            kw in prompt.lower() for kw in [\"skeleton\", \"skeletonize\", \"repomix\", \"pack\", \"map\", \"structure\"]\n        )\n        \n        if is_qa_request:\n            dir_to_scan = target_abs if os.path.isdir(target_abs) else os.path.dirname(target_abs)\n            meaningful_map = build_meaningful_map(dir_to_scan)\n            \n            # Flatten for search\n            flat_docs = flatten_meaningful_map(meaningful_map)\n            \n            search_engine = CodeSearchEngine(flat_docs)\n            matched_funcs = search_engine.search(prompt, top_k=3)\n            \n            # Generate Global Skeleton, Retrieve Code with Dependencies, and Construct Agentic Prompt\n            skeleton_str = CodebaseContextManager.generate_global_skeleton(meaningful_map)\n            evidence_docs = CodebaseContextManager.retrieve_relevant_code(matched_funcs, flat_docs)\n            \n            header = f\"[QA] [CodeReviewerTool QA Pipeline Activated] for codebase in: {os.path.basename(dir_to_scan)}\\n\"\n            header += f\"   -> Found {len(meaningful_map)} classes/functions in codebase.\\n\"\n            if matched_funcs:\n                header += f\"   -> Identified {len(matched_funcs)} items matching query:\\n\"\n                for f in matched_funcs:\n                    if f[\"type\"] == \"method\":\n                        header += f\"      * Method: {f['class_name']}.{f['name']} | File: {f['file']} | Signature: {f['signature']} | Summary: {f['summary']}\\n\"\n                    else:\n                        header += f\"      * Function: {f['name']} | File: {f['file']} | Signature: {f['signature']} | Summary: {f['summary']}\\n\"\n            else:\n                header += f\"   -> No highly matching items identified for search query.\\n\"\n                \n            dependencies = [f for f in evidence_docs if f not in matched_funcs]\n            if dependencies:\n                header += \"   -> Resolved call-graph dependencies:\\n\"\n                for f in dependencies:\n                    if f[\"type\"] == \"method\":\n                        header += f\"      + Dependency Method: {f['class_name']}.{f['name']} | File: {f['file']} | Summary: {f['summary']}\\n\"\n                    else:\n                        header += f\"      + Dependency Function: {f['name']} | File: {f['file']} | Summary: {f['summary']}\\n\"\n                        \n            api_key = get_nvidia_api_key()\n            if api_key and matched_funcs:\n                llm_prompt = CodebaseContextManager.construct_agentic_prompt(prompt, skeleton_str, evidence_docs)\n                sys_prompt = \"You are a software architect explaining system design based on function implementations.\"\n                \n                analysis_res = query_nvidia(llm_prompt, sys_prompt)\n                output = f\"{header}\\n--- Final Analysis (NVIDIA NIM) ---\\n{analysis_res}\"\n            else:\n                fallback_res = \"\"\n                if not api_key:\n                    fallback_res += \"   -> Note: NVIDIA_API_KEY is not set. Displaying matching items and dependencies directly:\\n\\n\"\n                else:\n                    fallback_res += \"   -> Note: Displaying matching items and dependencies directly:\\n\\n\"\n                \n                for f in evidence_docs:\n                    calls_str = \", \".join(f.get(\"calls\", []))\n                    is_dep = f not in matched_funcs\n                    dep_suffix = \" (Dependency)\" if is_dep else \"\"\n                    if f[\"type\"] == \"method\":\n                        fallback_res += f\"*** Method: {f['class_name']}.{f['name']} | {f['signature']} | Calls: [{calls_str}]{dep_suffix} ***\\n{f['code']}\\n\" + \"=\"*50 + \"\\n\"\n                    else:\n                        fallback_res += f\"*** Function: {f['name']} | {f['signature']} | Calls: [{calls_str}]{dep_suffix} ***\\n{f['code']}\\n\" + \"=\"*50 + \"\\n\"\n                output = f\"{header}\\n{fallback_res}\"\n                \n        elif is_arch_request:\n            if os.path.isfile(target_abs):\n                return f\"[DESIGN] [CodeReviewerTool Activated] Codebase Skeletonizer target must be a directory. Target specified is a file: {os.path.basename(target_abs)}\"\n            \n            output_xml = self._generate_skeleton_xml(target_abs)\n            output_file = os.path.join(target_abs, \"repo_skeleton.xml\")\n            try:\n                with open(output_file, \"w\", encoding=\"utf-8\") as f:\n                    f.write(output_xml)\n                status_str = f\"Saved XML context map to: {output_file}\"\n            except Exception as e:\n                status_str = f\"Failed to save XML context file: {str(e)}\"\n                \n            preview_lines = output_xml.splitlines()[:25]\n            preview = \"\\n\".join([\"      \" + l for l in preview_lines])\n            \n            report = [\n                f\"[DESIGN] [CodeReviewerTool Activated] Codebase Skeletonizer completed for: {os.path.basename(target_abs)}\",\n                f\"   -> Status: {status_str}\",\n                f\"   -> XML Preview (First 25 lines):\",\n                preview,\n                f\"      ... (XML file truncated, check '{os.path.basename(output_file)}' for full content)\"\n            ]\n            output = \"\\n\".join(report)\n        else:\n            if os.path.isfile(target_abs):\n                res = self.analyze_file(target_abs)\n                report = [\n                    f\"[REVIEW] [CodeReviewerTool Activated] File Analysis for: {os.path.basename(target_abs)}\",\n                    f\"   -> Total Lines: {res['lines']}\",\n                    f\"   -> Classes: {res['classes']}\",\n                    f\"   -> Functions: {res['functions']}\",\n                    f\"   -> Security Alerts ({len(res['security_issues'])}):\",\n                ]\n                if res['security_issues']:\n                    for iss in res['security_issues']:\n                        report.append(f\"      [!] {iss}\")\n                else:\n                    report.append(\"      No security threats found.\")\n                    \n                report.append(f\"   -> Readability Recommendations ({len(res['style_issues'])}):\")\n                if res['style_issues']:\n                    for iss in res['style_issues']:\n                        report.append(f\"      [*] {iss}\")\n                else:\n                    report.append(\"      Style conventions followed.\")\n                \n                output = \"\\n\".join(report)\n            else:\n                output = self.analyze_codebase(target_abs)\n            \n        return output.encode('ascii', 'ignore').decode('ascii')",
         "calls": [
           "re.findall",
           "os.path.abspath",
@@ -669,9 +803,12 @@
           "flatten_meaningful_map",
           "CodeSearchEngine",
           "search_engine.search",
+          "CodebaseContextManager.generate_global_skeleton",
+          "CodebaseContextManager.retrieve_relevant_code",
           "get_nvidia_api_key",
           "os.path.isdir",
           "os.path.dirname",
+          "CodebaseContextManager.construct_agentic_prompt",
           "query_nvidia",
           "os.path.isfile",
           "self._generate_skeleton_xml",
@@ -680,7 +817,6 @@
           "output.encode",
           "os.path.basename",
           "len",
-          "json.dumps",
           "', '.join",
           "output_xml.splitlines",
           "self.analyze_file",
@@ -693,7 +829,7 @@
           "str"
         ],
         "file": "code_reviewer.py",
-        "hash": "53af705154b7502cb3d01c5fad1ebe48",
+        "hash": "571012f01db2485041a67053c4e82533",
         "summary": "Execute in code_reviewer.py."
       },
       {
@@ -719,7 +855,7 @@
         ],
         "file": "code_reviewer.py",
         "hash": "d2108d8f49b75092b50a7bac251b22e8",
-        "summary": " get ast skeleton in code_reviewer.py."
+        "summary": "Get ast skeleton in code_reviewer.py."
       },
       {
         "name": "_get_function_signature",
@@ -732,7 +868,7 @@
         ],
         "file": "code_reviewer.py",
         "hash": "6e20db827a6ffc82e8e348c995261c10",
-        "summary": " get function signature in code_reviewer.py."
+        "summary": "Get function signature in code_reviewer.py."
       },
       {
         "name": "_generate_skeleton_xml",
@@ -761,7 +897,7 @@
         ],
         "file": "code_reviewer.py",
         "hash": "ab49d05bf880b5fa3a09cf0988d7f51f",
-        "summary": " generate skeleton xml in code_reviewer.py."
+        "summary": "Generate skeleton xml in code_reviewer.py."
       },
       {
         "name": "analyze_file",
