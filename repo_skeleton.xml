@@ -1,0 +1,326 @@
+<?xml version="1.0" ?>
+<repository_map>
+  <structure>
+  - .env
+  - repo_meaningful_map.json
+  - repo_skeleton.xml
+  - router.py
+  - tools.py
+</structure>
+  <file path="router.py">
+    <summary>No file-level description.</summary>
+    <imports>
+      <import_statement>import re</import_statement>
+      <import_statement>import math</import_statement>
+      <import_statement>from collections import Counter</import_statement>
+      <import_statement>from typing import Dict, Any, List, Optional, Set, Tuple</import_statement>
+      <import_statement>from tools import BaseTool, WebSearchTool, CodeGeneratorTool, DebuggerTool, CodeOptimizerTool, CodeReviewerTool, CodeConverterTool, TestGeneratorTool, DeploymentTool, SystemDesignTool, DocumentationTool, DefaultAgentChat</import_statement>
+    </imports>
+    <classes>
+      <class>
+        <class_signature>class IntentRule</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def __init__(self, high_level: str, low_level: str, keywords: List[str], regex_patterns: List[str]=None)</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def matches(self, prompt: str) -&gt; bool</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+      <class>
+        <class_signature>class TfidfSimilarity</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def __init__(self, exemplars: List[Dict[str, Any]])</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def _build(self)</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def _vectorize(self, tokens: List[str]) -&gt; Dict[str, float]</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def get_similarities(self, query: str) -&gt; List[Dict[str, Any]]</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+      <class>
+        <class_signature>class HierarchicalRouter</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def __init__(self, similarity_threshold: float=0.33)</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def _setup_rules(self)</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def add_rule(self, rule: IntentRule)</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def _setup_exemplars(self)</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def route(self, prompt: str) -&gt; Dict[str, Any]</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+      <class>
+        <class_signature>class ToolOrchestrator</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def __init__(self)</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def _register_tools(self)</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def get_tool_for_intent(self, high_level_intent: str) -&gt; BaseTool</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def process_and_execute(self, prompt: str) -&gt; Dict[str, Any]</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+    </classes>
+    <functions>
+      <function>
+        <function_signature>def tokenize(text: str) -&gt; List[str]</function_signature>
+        <docstring>Lowercases, removes punctuation, and splits text into cleaned tokens, filtering stop words.</docstring>
+      </function>
+    </functions>
+  </file>
+  <file path="tools.py">
+    <summary>No file-level description.</summary>
+    <imports>
+      <import_statement>import urllib.request</import_statement>
+      <import_statement>import urllib.parse</import_statement>
+      <import_statement>import re</import_statement>
+      <import_statement>import os</import_statement>
+      <import_statement>import ast</import_statement>
+      <import_statement>import json</import_statement>
+      <import_statement>import math</import_statement>
+      <import_statement>import xml.etree.ElementTree</import_statement>
+      <import_statement>from xml.dom import minidom</import_statement>
+      <import_statement>from collections import Counter</import_statement>
+      <import_statement>from typing import List, Dict</import_statement>
+    </imports>
+    <classes>
+      <class>
+        <class_signature>class CodeSearchEngine</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def __init__(self, documents: list)</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def _build(self)</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def _vectorize(self, tokens: List[str]) -&gt; Dict[str, float]</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def search(self, query: str, top_k: int=3) -&gt; list</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+      <class>
+        <class_signature>class BaseTool</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def __init__(self, name: str, description: str)</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def execute(self, prompt: str, low_levels: List[str]) -&gt; str</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+      <class>
+        <class_signature>class WebSearchTool(BaseTool)</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def execute(self, prompt: str, low_levels: List[str]) -&gt; str</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+      <class>
+        <class_signature>class CodeGeneratorTool(BaseTool)</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def execute(self, prompt: str, low_levels: List[str]) -&gt; str</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+      <class>
+        <class_signature>class DebuggerTool(BaseTool)</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def execute(self, prompt: str, low_levels: List[str]) -&gt; str</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+      <class>
+        <class_signature>class CodeOptimizerTool(BaseTool)</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def execute(self, prompt: str, low_levels: List[str]) -&gt; str</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+      <class>
+        <class_signature>class CodeReviewerTool(BaseTool)</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def execute(self, prompt: str, low_levels: List[str]) -&gt; str</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def _get_ast_skeleton(self, filepath: str) -&gt; dict</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def _get_function_signature(self, node) -&gt; str</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def _generate_skeleton_xml(self, dirpath: str) -&gt; str</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def analyze_file(self, filepath: str) -&gt; dict</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+          <method>
+            <method_signature>def analyze_codebase(self, dirpath: str) -&gt; str</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+      <class>
+        <class_signature>class CodeConverterTool(BaseTool)</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def execute(self, prompt: str, low_levels: List[str]) -&gt; str</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+      <class>
+        <class_signature>class TestGeneratorTool(BaseTool)</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def execute(self, prompt: str, low_levels: List[str]) -&gt; str</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+      <class>
+        <class_signature>class DeploymentTool(BaseTool)</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def execute(self, prompt: str, low_levels: List[str]) -&gt; str</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+      <class>
+        <class_signature>class SystemDesignTool(BaseTool)</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def execute(self, prompt: str, low_levels: List[str]) -&gt; str</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+      <class>
+        <class_signature>class DocumentationTool(BaseTool)</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def execute(self, prompt: str, low_levels: List[str]) -&gt; str</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+      <class>
+        <class_signature>class DefaultAgentChat(BaseTool)</class_signature>
+        <docstring>No class description.</docstring>
+        <methods>
+          <method>
+            <method_signature>def execute(self, prompt: str, low_levels: List[str]) -&gt; str</method_signature>
+            <docstring>No method description.</docstring>
+          </method>
+        </methods>
+      </class>
+    </classes>
+    <functions>
+      <function>
+        <function_signature>def stem(word: str) -&gt; str</function_signature>
+        <docstring>No function description.</docstring>
+      </function>
+      <function>
+        <function_signature>def tokenize(text: str) -&gt; list</function_signature>
+        <docstring>No function description.</docstring>
+      </function>
+      <function>
+        <function_signature>def get_nvidia_api_key() -&gt; str</function_signature>
+        <docstring>No function description.</docstring>
+      </function>
+      <function>
+        <function_signature>def query_nvidia(prompt: str, system_prompt: str='') -&gt; str</function_signature>
+        <docstring>No function description.</docstring>
+      </function>
+      <function>
+        <function_signature>def get_functions_from_file(filepath: str) -&gt; list</function_signature>
+        <docstring>No function description.</docstring>
+      </function>
+      <function>
+        <function_signature>def generate_fallback_summary(func: dict) -&gt; str</function_signature>
+        <docstring>No function description.</docstring>
+      </function>
+      <function>
+        <function_signature>def build_meaningful_map(dirpath: str) -&gt; list</function_signature>
+        <docstring>No function description.</docstring>
+      </function>
+    </functions>
+  </file>
+</repository_map>
