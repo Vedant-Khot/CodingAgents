@@ -2,6 +2,7 @@
 <repository_map>
   <structure>
   - .env
+  - .gitignore
   - README.md
   - repo_meaningful_map.json
   - repo_skeleton.xml

@@ -77,26 +77,34 @@ def build_meaningful_map(dirpath: str) -> list:
             with open(cache_path, "r", encoding="utf-8") as f:
                 cached_data = json.load(f)
                 for item in cached_data:
-                    cache_map[(item.get("file"), item.get("name"))] = item.get("summary", "")
+                    cache_map[(item.get("file"), item.get("name"))] = (item.get("summary", ""), item.get("hash", ""))
         except Exception:
             pass
             
     api_key = get_nvidia_api_key()
-    print(api_key);
+    import hashlib
+    
     for func in all_functions:
+        func_hash = hashlib.md5(func["code"].encode("utf-8")).hexdigest()
+        func["hash"] = func_hash
+        
         cache_key = (func["file"], func["name"])
-        if cache_key in cache_map and cache_map[cache_key]:
-            func["summary"] = cache_map[cache_key]
-        else:
-            if api_key:
-                prompt = f"Write a 1-sentence summary of what this python function does:\n\n{func['code']}"
-                sys_prompt = "You are a compiler that outputs a single short sentence explaining a function."
-                summary = query_nvidia(prompt, sys_prompt)
-                if "NVIDIA API Error" in summary:
-                    summary = generate_fallback_summary(func)
-            else:
+        if cache_key in cache_map:
+            cached_summary, cached_hash = cache_map[cache_key]
+            if cached_summary and cached_hash == func_hash:
+                func["summary"] = cached_summary
+                continue
+                
+        # Cache miss or hash mismatch: regenerate summary
+        if api_key:
+            prompt = f"Write a 1-sentence summary of what this python function does:\n\n{func['code']}"
+            sys_prompt = "You are a compiler that outputs a single short sentence explaining a function."
+            summary = query_nvidia(prompt, sys_prompt)
+            if "NVIDIA API Error" in summary:
                 summary = generate_fallback_summary(func)
-            func["summary"] = summary
+        else:
+            summary = generate_fallback_summary(func)
+        func["summary"] = summary
             
     try:
         with open(cache_path, "w", encoding="utf-8") as f:
