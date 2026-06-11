@@ -6,6 +6,7 @@
     "code": "def tokenize(text: str) -> List[str]:\n    \"\"\"Lowercases, removes punctuation, and splits text into cleaned tokens, filtering stop words.\"\"\"\n    text = text.lower()\n    text = re.sub(r'[^a-z0-9\\s]', '', text)\n    tokens = text.split()\n    \n    stop_words = {\n        'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'arent', 'as', 'at',\n        'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by', 'can', 'cant', 'cannot',\n        'could', 'couldnt', 'did', 'didnt', 'do', 'does', 'doesnt', 'doing', 'dont', 'down', 'during', 'each', 'few',\n        'for', 'from', 'further', 'had', 'hadnt', 'has', 'hasnt', 'have', 'havent', 'having', 'he', 'hed', 'hell',\n        'hes', 'her', 'here', 'heres', 'hers', 'herself', 'him', 'himself', 'his', 'how', 'hows', 'i', 'id', 'ill',\n        'im', 'ive', 'if', 'in', 'into', 'is', 'isnt', 'it', 'its', 'itself', 'lets', 'me', 'more', 'most', 'mustnt',\n        'my', 'myself', 'no', 'nor', 'not', 'of', 'off', 'on', 'once', 'only', 'or', 'other', 'ought', 'our', 'ours',\n        'ourselves', 'out', 'over', 'own', 'same', 'shant', 'she', 'shed', 'shell', 'shes', 'should', 'shouldnt',\n        'so', 'some', 'such', 'than', 'that', 'thats', 'the', 'their', 'theirs', 'them', 'themselves', 'then',\n        'there', 'theres', 'these', 'they', 'theyd', 'theyll', 'theyre', 'theyve', 'this', 'those', 'through',\n        'to', 'too', 'under', 'until', 'up', 'very', 'was', 'wasnt', 'we', 'wed', 'well', 'were', 'weve', 'werent',\n        'what', 'whats', 'when', 'whens', 'where', 'wheres', 'which', 'while', 'who', 'whos', 'whom', 'why', 'whys',\n        'with', 'wont', 'would', 'wouldnt', 'you', 'youd', 'youll', 'youre', 'youve', 'your', 'yours', 'yourself',\n        'yourselves'\n    }\n    return [t for t in tokens if t not in stop_words and len(t) > 1]",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "c598121d3fcc2aaf07c47d7b2327e8f8",
     "summary": "Lowercases, removes punctuation, and splits text into cleaned tokens, filtering stop words."
   },
   {
@@ -15,6 +16,7 @@
     "code": "    def __init__(self, high_level: str, low_level: str, keywords: List[str], regex_patterns: List[str] = None):\n        self.high_level = high_level\n        self.low_level = low_level\n        self.keywords = [kw.lower() for kw in keywords]\n        self.regex_patterns = [re.compile(pattern, re.IGNORECASE) for pattern in (regex_patterns or [])]",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "122237440a60024a1abde4b5908c1eee",
     "summary": "  init   in router.py."
   },
   {
@@ -24,6 +26,7 @@
     "code": "    def matches(self, prompt: str) -> bool:\n        prompt_lower = prompt.lower()\n        for kw in self.keywords:\n            if kw in prompt_lower:\n                return True\n        for pattern in self.regex_patterns:\n            if pattern.search(prompt):\n                return True\n        return False",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "7114d2c199e0cb8c84cb5b45b42d23c5",
     "summary": "Matches in router.py."
   },
   {
@@ -33,6 +36,7 @@
     "code": "    def __init__(self, exemplars: List[Dict[str, Any]]):\n        self.exemplars = exemplars\n        self.vocab = set()\n        self.idf = {}\n        self.exemplar_vectors = []\n        self._build()",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "1942548ae617db578e37836813da8528",
     "summary": "  init   in router.py."
   },
   {
@@ -42,6 +46,7 @@
     "code": "    def _build(self):\n        tokenized_exemplars = []\n        for ex in self.exemplars:\n            tokens = tokenize(ex[\"text\"])\n            tokenized_exemplars.append(tokens)\n            self.vocab.update(tokens)\n            \n        N = len(self.exemplars)\n        for word in self.vocab:\n            df = sum(1 for tokens in tokenized_exemplars if word in tokens)\n            self.idf[word] = math.log(1 + N / (1 + df))\n            \n        for tokens in tokenized_exemplars:\n            vector = self._vectorize(tokens)\n            self.exemplar_vectors.append(vector)",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "acb2ba1fd41521fc258b051a09e4d43f",
     "summary": " build in router.py."
   },
   {
@@ -51,6 +56,7 @@
     "code": "    def _vectorize(self, tokens: List[str]) -> Dict[str, float]:\n        tf = Counter(tokens)\n        vector = {}\n        for word, count in tf.items():\n            if word in self.idf:\n                vector[word] = count * self.idf[word]\n        \n        sq_sum = sum(val ** 2 for val in vector.values())\n        if sq_sum > 0:\n            norm = math.sqrt(sq_sum)\n            for word in vector:\n                vector[word] /= norm\n        return vector",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "4f2148aa2f5b60b409827d80d320317f",
     "summary": " vectorize in router.py."
   },
   {
@@ -60,6 +66,7 @@
     "code": "    def get_similarities(self, query: str) -> List[Dict[str, Any]]:\n        query_tokens = tokenize(query)\n        query_vec = self._vectorize(query_tokens)\n        \n        results = []\n        for i, ex in enumerate(self.exemplars):\n            ex_vec = self.exemplar_vectors[i]\n            dot_product = sum(query_vec.get(word, 0) * ex_vec.get(word, 0) for word in query_vec)\n            results.append({\n                \"exemplar\": ex[\"text\"],\n                \"high_level\": ex[\"high\"],\n                \"low_level\": ex[\"low\"],\n                \"similarity\": dot_product\n            })\n            \n        results.sort(key=lambda x: x[\"similarity\"], reverse=True)\n        return results",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "a7a6ea8c373f8ea6f47e8e1495a7aea6",
     "summary": "Get similarities in router.py."
   },
   {
@@ -69,6 +76,7 @@
     "code": "    def __init__(self, similarity_threshold: float = 0.33):\n        self.similarity_threshold = similarity_threshold\n        self.rules: List[IntentRule] = []\n        self._setup_rules()\n        self._setup_exemplars()",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "438f418c311c80450afce722c805a2d6",
     "summary": "  init   in router.py."
   },
   {
@@ -78,6 +86,7 @@
     "code": "    def _setup_rules(self):\n        # Learn rules\n        self.add_rule(IntentRule(\"Learn\", \"Concept\", [\"what is a\", \"what is\", \"explain the\", \"explain\", \"how does\", \"concept of\"], [r\"\\bexplain\\s+[a-zA-Z0-9_-]+\"]))\n        self.add_rule(IntentRule(\"Learn\", \"Comparison\", [\"vs\", \"versus\", \"difference between\"]))\n        self.add_rule(IntentRule(\"Learn\", \"Tutorial\", [\"teach me\", \"tutorial for\", \"step by step guide\"]))\n        \n        # Build rules\n        self.add_rule(IntentRule(\"Build\", \"Frontend\", [\"login screen\", \"login page\", \"angular component\", \"css styling\", \"react widget\"]))\n        self.add_rule(IntentRule(\"Build\", \"Backend\", [\"write python code\", \"build python script\", \"node express server\", \"flask backend\"]))\n        self.add_rule(IntentRule(\"Build\", \"API\", [\"rest api\", \"graphql query\", \"express route\", \"api endpoint\"]))\n        self.add_rule(IntentRule(\"Build\", \"Database\", [\"sql table\", \"prisma schema\", \"database migration\"]))\n\n        # Fix rules\n        self.add_rule(IntentRule(\"Fix\", \"Error\", [\"why is this error\", \"app crashes\", \"uncaught exception\", \"traceback\", \"fails with\"]))\n        self.add_rule(IntentRule(\"Fix\", \"Bug\", [\"fix this bug\", \"incorrect output\", \"wrong calculations\"]))\n        self.add_rule(IntentRule(\"Fix\", \"Configuration\", [\"npm install error\", \"requirements.txt conflict\", \"webpack config\"]))\n\n        # Improve rules\n        self.add_rule(IntentRule(\"Improve\", \"Refactor\", [\"refactor this\", \"make this cleaner\", \"clean code\", \"improve readability\"]))\n        self.add_rule(IntentRule(\"Improve\", \"Optimize\", [\"optimize this\", \"speed up\", \"run faster\", \"reduce memory\"]))\n        self.add_rule(IntentRule(\"Improve\", \"Secure\", [\"prevent sql injection\", \"xss sanitization\", \"security vulnerability\"]))\n\n        # Analyze rules\n        self.add_rule(IntentRule(\"Analyze\", \"Code Review\", [\"review this code\", \"code review for\", \"lint check\"]))\n        self.add_rule(IntentRule(\"Analyze\", \"Architecture Review\", [\"architecture review\", \"evaluate design pattern\", \"skeleton\", \"skeletonize\", \"repomix\", \"codebase map\", \"repository map\"]))\n        self.add_rule(IntentRule(\"Analyze\", \"Codebase QA\", [\"our codebase\", \"this codebase\", \"this project\", \"in this repository\", \"how does our\", \"explain our\", \"how does the codebase\", \"how is our\", \"where does our\", \"work in this project\", \"works in this project\"]))\n\n        # Convert rules\n        self.add_rule(IntentRule(\"Convert\", \"Language\", [\"convert to python\", \"translate to typescript\", \"port java to rust\"]))\n        self.add_rule(IntentRule(\"Convert\", \"Framework\", [\"migrate angularjs to angular\", \"convert react to vue\"]))\n\n        # Test rules\n        self.add_rule(IntentRule(\"Test\", \"Unit\", [\"write unit tests\", \"generate test cases\", \"pytest for\", \"junit\"]))\n\n        # Deploy rules\n        self.add_rule(IntentRule(\"Deploy\", \"Docker\", [\"dockerize\", \"dockerfile\", \"docker-compose\"]))\n        self.add_rule(IntentRule(\"Deploy\", \"CI/CD\", [\"github actions pipeline\", \"configure cicd\", \"jenkinsfile\"]))\n\n        # Design rules\n        self.add_rule(IntentRule(\"Design\", \"System\", [\"design whatsapp\", \"system design of\", \"system architecture\"]))\n        self.add_rule(IntentRule(\"Design\", \"Database\", [\"database design for\", \"design schema\"]))\n\n        # Document rules\n        self.add_rule(IntentRule(\"Document\", \"README\", [\"write readme\", \"readme.md template\"]))\n        self.add_rule(IntentRule(\"Document\", \"API Docs\", [\"generate api docs\", \"swagger documentation\"]))\n        self.add_rule(IntentRule(\"Document\", \"Comments\", [\"add comments\", \"add docstrings\", \"explain inline\"]))",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "df24e99dd4e1cc248ee1787511f6ff89",
     "summary": " setup rules in router.py."
   },
   {
@@ -87,6 +96,7 @@
     "code": "    def add_rule(self, rule: IntentRule):\n        self.rules.append(rule)",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "917a43b5ad2292d9b202eedaae0b4bae",
     "summary": "Add rule in router.py."
   },
   {
@@ -96,6 +106,7 @@
     "code": "    def _setup_exemplars(self):\n        exemplars = [\n            # 1. Learn\n            {\"text\": \"explain the concept of jwt token authentication oauth session login\", \"high\": \"Learn\", \"low\": \"Concept\"},\n            {\"text\": \"what is a binary tree database index hashing load balancer\", \"high\": \"Learn\", \"low\": \"Concept\"},\n            {\"text\": \"how does docker containerization virtual machine work internally\", \"high\": \"Learn\", \"low\": \"Concept\"},\n            {\"text\": \"teach me react from scratch step by step guide book\", \"high\": \"Learn\", \"low\": \"Tutorial\"},\n            {\"text\": \"guide tutorial to build a simple rest api with node js backend\", \"high\": \"Learn\", \"low\": \"Tutorial\"},\n            {\"text\": \"compare react vs vue vs angular which is better comparison pros cons\", \"high\": \"Learn\", \"low\": \"Comparison\"},\n            {\"text\": \"difference between sql and nosql postgres mongodb database engines\", \"high\": \"Learn\", \"low\": \"Comparison\"},\n            \n            # 2. Build\n            {\"text\": \"create a beautiful login screen page html css tailwind flexbox responsive\", \"high\": \"Build\", \"low\": \"Frontend\"},\n            {\"text\": \"generate a new angular component user interface dashboard card profile\", \"high\": \"Build\", \"low\": \"Frontend\"},\n            {\"text\": \"write python backend django views controller server script\", \"high\": \"Build\", \"low\": \"Backend\"},\n            {\"text\": \"implement express.js backend router logic node server code\", \"high\": \"Build\", \"low\": \"Backend\"},\n            {\"text\": \"build a rest api web service endpoint url mapping search route\", \"high\": \"Build\", \"low\": \"API\"},\n            {\"text\": \"create database tables schema model definition prisma relational diagram\", \"high\": \"Build\", \"low\": \"Database\"},\n            \n            # 3. Fix\n            {\"text\": \"why is this exception occurring error crash failure traceback bug\", \"high\": \"Fix\", \"low\": \"Error\"},\n            {\"text\": \"uncaught runtime exception typeerror undefined is not a function crash\", \"high\": \"Fix\", \"low\": \"Error\"},\n            {\"text\": \"my react app shows ExpressionChangedAfterItHasBeenCheckedError crash runtime\", \"high\": \"Fix\", \"low\": \"Error\"},\n            {\"text\": \"fix this logical bug sorting algorithm index out of bounds loop wrong value\", \"high\": \"Fix\", \"low\": \"Bug\"},\n            {\"text\": \"there is a bug in my conditional check state updates incorrect behavior\", \"high\": \"Fix\", \"low\": \"Bug\"},\n            {\"text\": \"fix dependency configuration issue package lock json node modules conflict\", \"high\": \"Fix\", \"low\": \"Configuration\"},\n            \n            # 4. Improve\n            {\"text\": \"refactor this code to follow dry clean code patterns solid design principles\", \"high\": \"Improve\", \"low\": \"Refactor\"},\n            {\"text\": \"make this class hierarchy cleaner easier to read code smell reuse\", \"high\": \"Improve\", \"low\": \"Refactor\"},\n            {\"text\": \"optimize this python function run faster reduce latency scale performance cpu\", \"high\": \"Improve\", \"low\": \"Optimize\"},\n            {\"text\": \"improve algorithm performance speed up execution decrease time complexity O(N)\", \"high\": \"Improve\", \"low\": \"Optimize\"},\n            {\"text\": \"make this script secure against sql injection sanitizing database queries\", \"high\": \"Improve\", \"low\": \"Secure\"},\n            {\"text\": \"sanitize inputs prevent cross site scripting xss vulnerability security leak\", \"high\": \"Improve\", \"low\": \"Secure\"},\n            \n            # 5. Analyze\n            {\"text\": \"please review my code for potential bugs security flaws code smells\", \"high\": \"Analyze\", \"low\": \"Code Review\"},\n            {\"text\": \"provide code review comments feedback pull request merge review\", \"high\": \"Analyze\", \"low\": \"Code Review\"},\n            {\"text\": \"analyze system architecture diagrams cloud design microservices setup\", \"high\": \"Analyze\", \"low\": \"Architecture Review\"},\n            {\"text\": \"review architecture of this node.js application components structure database\", \"high\": \"Analyze\", \"low\": \"Architecture Review\"},\n            {\"text\": \"run security scan verify packages vulnerabilities audit dependencies\", \"high\": \"Analyze\", \"low\": \"Security Review\"},\n            {\"text\": \"how does our login system work in this project\", \"high\": \"Analyze\", \"low\": \"Codebase QA\"},\n            {\"text\": \"explain how tokenization or word splitting works in our codebase\", \"high\": \"Analyze\", \"low\": \"Codebase QA\"},\n            {\"text\": \"where is the router defined in this repository\", \"high\": \"Analyze\", \"low\": \"Codebase QA\"},\n            {\"text\": \"how does the codebase process and execute queries\", \"high\": \"Analyze\", \"low\": \"Codebase QA\"},\n            \n            # 6. Convert\n            {\"text\": \"convert java code snippet logic function structure to python\", \"high\": \"Convert\", \"low\": \"Language\"},\n            {\"text\": \"translate typescript function codebase files into clean go rust code\", \"high\": \"Convert\", \"low\": \"Language\"},\n            {\"text\": \"migrate our angularjs legacy frontend application to angular 18 typescript\", \"high\": \"Convert\", \"low\": \"Framework\"},\n            {\"text\": \"convert mysql tables schemas setup query syntax to mongodb collections\", \"high\": \"Convert\", \"low\": \"Database\"},\n            \n            # 7. Test\n            {\"text\": \"write unit tests testing validation functions module using pytest unittest\", \"high\": \"Test\", \"low\": \"Unit\"},\n            {\"text\": \"generate mock test cases assertions for backend service class functions\", \"high\": \"Test\", \"low\": \"Unit\"},\n            {\"text\": \"write integration tests verifying database connection api endpoints routes pipeline\", \"high\": \"Test\", \"low\": \"Integration\"},\n            {\"text\": \"create e2e end-to-end user browser tests cypress playwright automation\", \"high\": \"Test\", \"low\": \"E2E\"},\n            \n            # 8. Deploy\n            {\"text\": \"how do i deploy host release this application on aws ec2 gcp cloud service\", \"high\": \"Deploy\", \"low\": \"Cloud\"},\n            {\"text\": \"dockerize my web application write dockerfile multi stage build container setup\", \"high\": \"Deploy\", \"low\": \"Docker\"},\n            {\"text\": \"configure ci cd automated pipeline workflow github actions jenkins deploy script\", \"high\": \"Deploy\", \"low\": \"CI/CD\"},\n            \n            # 9. Design\n            {\"text\": \"design system architecture scaled whatsapp chat application netflix load balancer\", \"high\": \"Design\", \"low\": \"System\"},\n            {\"text\": \"create database schema entity relationship diagram architecture ERD design\", \"high\": \"Design\", \"low\": \"Database\"},\n            {\"text\": \"design REST API endpoints specs swagger schema blueprints paths design patterns\", \"high\": \"Design\", \"low\": \"API\"},\n            \n            # 10. Document\n            {\"text\": \"write readme md markdown documentation file repository documentation structure\", \"high\": \"Document\", \"low\": \"README\"},\n            {\"text\": \"generate swagger openapi specs api docs document paths outputs queries\", \"high\": \"Document\", \"low\": \"API Docs\"},\n            {\"text\": \"add documentation code comments python docstrings explain logic inside methods\", \"high\": \"Document\", \"low\": \"Comments\"}\n        ]\n        self.similarity_engine = TfidfSimilarity(exemplars)",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "4a4eac10eb6b19fb47a89784645f498a",
     "summary": " setup exemplars in router.py."
   },
   {
@@ -105,6 +116,7 @@
     "code": "    def route(self, prompt: str) -> Dict[str, Any]:\n        high_intents: Set[str] = set()\n        low_intents: Set[str] = set()\n        \n        # 1. Level 1 Matching\n        for rule in self.rules:\n            if rule.matches(prompt):\n                high_intents.add(rule.high_level)\n                low_intents.add(rule.low_level)\n                \n        # 2. Level 2 Matching\n        sim_results = self.similarity_engine.get_similarities(prompt)\n        matches_above_threshold = [r for r in sim_results if r[\"similarity\"] >= self.similarity_threshold]\n        \n        for match in matches_above_threshold:\n            high_intents.add(match[\"high_level\"])\n            low_intents.add(match[\"low_level\"])\n            \n        # Fallback if empty\n        if not high_intents and sim_results:\n            best_match = sim_results[0]\n            if best_match[\"similarity\"] > 0.05:\n                high_intents.add(best_match[\"high_level\"])\n                low_intents.add(best_match[\"low_level\"])\n            else:\n                high_intents.add(\"Learn\")\n                low_intents.add(\"Concept\")\n\n        # Convert to list\n        high_list = sorted(list(high_intents))\n        low_list = sorted(list(low_intents))\n        \n        return {\n            \"high_level\": high_list,\n            \"low_level\": low_list,\n            \"best_score\": round(sim_results[0][\"similarity\"], 3) if sim_results else 0.0\n        }",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "26a370824477e11fb8ab3f28c467f28c",
     "summary": "Route in router.py."
   },
   {
@@ -114,6 +126,7 @@
     "code": "    def __init__(self):\n        self.router = HierarchicalRouter()\n        self.tools: Dict[str, BaseTool] = {}\n        self._register_tools()",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "90a6a872b60953e16c2bb61070566d68",
     "summary": "  init   in router.py."
   },
   {
@@ -123,6 +136,7 @@
     "code": "    def _register_tools(self):\n        # Register tools\n        self.tools[\"Learn\"] = WebSearchTool(\"LearnTool\", \"Searches documentation and tutorials.\")\n        self.tools[\"Build\"] = CodeGeneratorTool(\"BuilderTool\", \"Creates frontend/backend/database code.\")\n        self.tools[\"Fix\"] = DebuggerTool(\"DebuggerTool\", \"Diagnoses errors and suggests patches.\")\n        self.tools[\"Improve\"] = CodeOptimizerTool(\"OptimizerTool\", \"Refactors and speeds up execution.\")\n        self.tools[\"Analyze\"] = CodeReviewerTool(\"ReviewerTool\", \"Performs code audits and quality reviews.\")\n        self.tools[\"Convert\"] = CodeConverterTool(\"ConverterTool\", \"Translates code languages and migrates frameworks.\")\n        self.tools[\"Test\"] = TestGeneratorTool(\"TestGenTool\", \"Generates unit and integration tests.\")\n        self.tools[\"Deploy\"] = DeploymentTool(\"DeployerTool\", \"Creates deployment configuration pipelines.\")\n        self.tools[\"Design\"] = SystemDesignTool(\"DesignTool\", \"Generates architectural systems designs.\")\n        self.tools[\"Document\"] = DocumentationTool(\"DocTool\", \"Generates READMEs and API documentation.\")\n        # Fallback tool\n        self.tools[\"Default\"] = DefaultAgentChat(\"DefaultChat\", \"Standard conversational chatbot.\")",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "b2eee8a2b250b85ba723f21e6e025cd0",
     "summary": " register tools in router.py."
   },
   {
@@ -132,6 +146,7 @@
     "code": "    def get_tool_for_intent(self, high_level_intent: str) -> BaseTool:\n        return self.tools.get(high_level_intent, self.tools[\"Default\"])",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "45a3b86cc1fc65d3c74041b12e9f3702",
     "summary": "Get tool for intent in router.py."
   },
   {
@@ -141,6 +156,7 @@
     "code": "    def process_and_execute(self, prompt: str) -> Dict[str, Any]:\n        # Step 1: Run Router\n        routing_result = self.router.route(prompt)\n        high_intents = routing_result[\"high_level\"]\n        low_intents = routing_result[\"low_level\"]\n\n        execution_outputs = []\n        dispatched_tools = []\n\n        # Step 2: Dispatch and Execute matched tools\n        for intent in high_intents:\n            tool = self.get_tool_for_intent(intent)\n            if tool.name not in [t.name for t in dispatched_tools]:\n                dispatched_tools.append(tool)\n                # Filter low intents corresponding to this high level intent if needed (simplified here)\n                output = tool.execute(prompt, low_intents)\n                execution_outputs.append(output)\n\n        return {\n            \"prompt\": prompt,\n            \"high_level\": high_intents[0] if len(high_intents) == 1 else high_intents,\n            \"low_level\": low_intents[0] if len(low_intents) == 1 else low_intents,\n            \"confidence\": routing_result[\"best_score\"],\n            \"dispatched_tools\": [t.name for t in dispatched_tools],\n            \"execution_results\": execution_outputs\n        }",
     "file": "router.py",
     "filepath": ".\\router.py",
+    "hash": "cfe1f48fa64fcedb6b398faa1f937d13",
     "summary": "Process and execute in router.py."
   },
   {
@@ -150,6 +166,7 @@
     "code": "def stem(word: str) -> str:\n    suffixes = ('ization', 'ize', 'ing', 'ly', 'ed', 'es', 's', 'er', 'ment')\n    for suffix in suffixes:\n        if word.endswith(suffix) and len(word) > len(suffix) + 2:\n            return word[:-len(suffix)]\n    return word",
     "file": "base.py",
     "filepath": ".\\tools\\base.py",
+    "hash": "22792ed97dd49549a99679791ff5b846",
     "summary": "Stem in base.py."
   },
   {
@@ -159,6 +176,7 @@
     "code": "def tokenize(text: str) -> list:\n    text = text.lower()\n    text = re.sub(r'[^a-z0-9\\s]', '', text)\n    tokens = text.split()\n    stop_words = {\n        'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'arent', 'as', 'at',\n        'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by', 'can', 'cant', 'cannot',\n        'could', 'couldnt', 'did', 'didnt', 'do', 'does', 'doesnt', 'doing', 'dont', 'down', 'during', 'each', 'few',\n        'for', 'from', 'further', 'had', 'hadnt', 'has', 'hasnt', 'have', 'havent', 'having', 'he', 'hed', 'hell',\n        'hes', 'her', 'here', 'heres', 'hers', 'herself', 'him', 'himself', 'his', 'how', 'hows', 'i', 'id', 'ill',\n        'im', 'ive', 'if', 'in', 'into', 'is', 'isnt', 'it', 'its', 'itself', 'lets', 'me', 'more', 'most', 'mustnt',\n        'my', 'myself', 'no', 'nor', 'not', 'of', 'off', 'on', 'once', 'only', 'or', 'other', 'ought', 'our', 'ours',\n        'ourselves', 'out', 'over', 'own', 'same', 'shant', 'she', 'shed', 'shell', 'shes', 'should', 'shouldnt',\n        'so', 'some', 'such', 'than', 'that', 'thats', 'the', 'their', 'theirs', 'them', 'themselves', 'then',\n        'there', 'theres', 'these', 'they', 'theyd', 'theyll', 'theyre', 'theyve', 'this', 'those', 'through',\n        'to', 'too', 'under', 'until', 'up', 'very', 'was', 'wasnt', 'we', 'wed', 'well', 'were', 'weve', 'werent',\n        'what', 'whats', 'when', 'whens', 'where', 'wheres', 'which', 'while', 'who', 'whos', 'whom', 'why', 'whys',\n        'with', 'wont', 'would', 'wouldnt', 'you', 'youd', 'youll', 'youre', 'youve', 'your', 'yours', 'yourself',\n        'yourselves'\n    }\n    return [stem(t) for t in tokens if t not in stop_words and len(t) > 1]",
     "file": "base.py",
     "filepath": ".\\tools\\base.py",
+    "hash": "beb21965e4fdf7eb9f6d1b708c20b4e2",
     "summary": "Tokenize in base.py."
   },
   {
@@ -168,6 +186,7 @@
     "code": "def get_nvidia_api_key() -> str:\n    key = os.environ.get(\"NVIDIA_API_KEY\")\n    if key:\n        return key\n    try:\n        # Look for .env in current directory or parent directories\n        if os.path.exists(\".env\"):\n            with open(\".env\", \"r\", encoding=\"utf-8\") as f:\n                for line in f:\n                    line = line.strip()\n                    if line.startswith(\"NVIDIA_API_KEY=\"):\n                        return line.split(\"=\", 1)[1].strip().strip('\"').strip(\"'\")\n    except Exception:\n        pass\n    return \"\"",
     "file": "base.py",
     "filepath": ".\\tools\\base.py",
+    "hash": "dfe77821b29e1aa94016d73ef2c3e2a7",
     "summary": "Get nvidia api key in base.py."
   },
   {
@@ -177,6 +196,7 @@
     "code": "def query_nvidia(prompt: str, system_prompt: str = \"\") -> str:\n    api_key = get_nvidia_api_key()\n    if not api_key:\n        return \"NVIDIA API Error: NVIDIA_API_KEY is not set.\"\n        \n    try:\n        url = \"https://integrate.api.nvidia.com/v1/chat/completions\"\n        data = {\n            \"model\": \"moonshotai/kimi-k2.6\",\n            \"messages\": [\n                {\"role\": \"system\", \"content\": system_prompt},\n                {\"role\": \"user\", \"content\": prompt}\n            ],\n            \"temperature\": 0.2,\n            \"max_tokens\": 1024,\n            \"stream\": False\n        }\n        headers = {\n            \"Content-Type\": \"application/json\",\n            \"Authorization\": f\"Bearer {api_key}\"\n        }\n        req = urllib.request.Request(url, data=json.dumps(data).encode(\"utf-8\"), headers=headers)\n        with urllib.request.urlopen(req, timeout=60) as r:\n            res = json.loads(r.read().decode(\"utf-8\"))\n            return res[\"choices\"][0][\"message\"][\"content\"].strip()\n    except Exception as e:\n        return f\"NVIDIA API Error: {str(e)}\"",
     "file": "base.py",
     "filepath": ".\\tools\\base.py",
+    "hash": "4c463cfcaa3191f02081567eb5b069ed",
     "summary": "Query nvidia in base.py."
   },
   {
@@ -186,6 +206,7 @@
     "code": "    def __init__(self, name: str, description: str):\n        self.name = name\n        self.description = description",
     "file": "base.py",
     "filepath": ".\\tools\\base.py",
+    "hash": "904bddc7b244e84e0b329fb163192054",
     "summary": "  init   in base.py."
   },
   {
@@ -195,6 +216,7 @@
     "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        raise NotImplementedError(\"Each tool must implement its own execute logic.\")",
     "file": "base.py",
     "filepath": ".\\tools\\base.py",
+    "hash": "94ae09d97d313e0150cedf7619fb91e8",
     "summary": "Execute in base.py."
   },
   {
@@ -204,6 +226,7 @@
     "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        return (\n            f\"[CONVERT] [CodeConverterTool Activated] translating/converting for: {low_levels}\\n\"\n            f\"   -> Migration Path: Parsing and mapping AST to target language/framework syntax\\n\"\n            f\"   -> Result: Successfully ported snippets based on query: '{prompt}'.\"\n        )",
     "file": "code_converter.py",
     "filepath": ".\\tools\\code_converter.py",
+    "hash": "aa028ec92bd40716a54e475d815f35e9",
     "summary": "Execute in code_converter.py."
   },
   {
@@ -213,6 +236,7 @@
     "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        return (\n            f\"[CODE] [CodeGeneratorTool Activated] generating code scaffold for: {low_levels}\\n\"\n            f\"   -> Scaffold type: boilerplate class/configuration\\n\"\n            f\"   -> Generated Output:\\n\"\n            f\"      // Boilerplate for {low_levels}\\n\"\n            f\"      class Handler:\\n\"\n            f\"          def __init__(self):\\n\"\n            f\"              pass # Initialized for {prompt[:30]}...\"\n        )",
     "file": "code_generator.py",
     "filepath": ".\\tools\\code_generator.py",
+    "hash": "483fde0c7885ac802b9d866b8fef3311",
     "summary": "Execute in code_generator.py."
   },
   {
@@ -222,6 +246,7 @@
     "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        return (\n            f\"[OPTIMIZE] [CodeOptimizerTool Activated] refactoring for: {low_levels}\\n\"\n            f\"   -> Optimization Vector: Algorithmic complexity reduction & caching\\n\"\n            f\"   -> Result: Replaced nested loop with dictionary lookup (O(N^2) -> O(N)).\"\n        )",
     "file": "code_optimizer.py",
     "filepath": ".\\tools\\code_optimizer.py",
+    "hash": "4375a8119cb111f88b9e2ba3a09f6088",
     "summary": "Execute in code_optimizer.py."
   },
   {
@@ -231,6 +256,7 @@
     "code": "def get_functions_from_file(filepath: str) -> list:\n    functions = []\n    try:\n        with open(filepath, \"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n            code = f.read()\n            \n        tree = ast.parse(code)\n        lines = code.splitlines()\n        \n        for node in ast.walk(tree):\n            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):\n                start_line = node.lineno - 1\n                end_line = getattr(node, \"end_lineno\", len(lines))\n                func_code = \"\\n\".join(lines[start_line:end_line])\n                \n                try:\n                    args_str = ast.unparse(node.args)\n                except Exception:\n                    args_str = \"\"\n                ret_str = f\" -> {ast.unparse(node.returns)}\" if node.returns else \"\"\n                sig = f\"def {node.name}({args_str}){ret_str}\"\n                \n                functions.append({\n                    \"name\": node.name,\n                    \"signature\": sig,\n                    \"docstring\": ast.get_docstring(node) or \"\",\n                    \"code\": func_code,\n                    \"file\": os.path.basename(filepath),\n                    \"filepath\": filepath\n                })\n    except Exception as e:\n        pass\n    return functions",
     "file": "code_reviewer.py",
     "filepath": ".\\tools\\code_reviewer.py",
+    "hash": "ca08d65b2934c340cbee4090ea1dd93d",
     "summary": "Get functions from file in code_reviewer.py."
   },
   {
@@ -240,15 +266,17 @@
     "code": "def generate_fallback_summary(func: dict) -> str:\n    doc = func[\"docstring\"].strip().split(\"\\n\")[0] if func[\"docstring\"] else \"\"\n    if doc:\n        return doc\n    words = func[\"name\"].split(\"_\")\n    words[0] = words[0].capitalize()\n    return f\"{' '.join(words)} in {func['file']}.\"",
     "file": "code_reviewer.py",
     "filepath": ".\\tools\\code_reviewer.py",
+    "hash": "cf66323c9d2390b49981a6398fef1ef1",
     "summary": "Generate fallback summary in code_reviewer.py."
   },
   {
     "name": "build_meaningful_map",
     "signature": "def build_meaningful_map(dirpath: str) -> list",
     "docstring": "",
-    "code": "def build_meaningful_map(dirpath: str) -> list:\n    ignored_dirs = {'.git', '__pycache__', '.gemini', 'venv', '.venv', 'env', '.env', 'build', 'dist'}\n    all_functions = []\n    \n    for root, dirs, files in os.walk(dirpath):\n        dirs[:] = [d for d in dirs if d not in ignored_dirs]\n        for f in files:\n            if f.endswith(\".py\"):\n                filepath = os.path.join(root, f)\n                all_functions.extend(get_functions_from_file(filepath))\n                \n    cache_path = os.path.join(dirpath, \"repo_meaningful_map.json\")\n    cache_map = {}\n    if os.path.exists(cache_path):\n        try:\n            with open(cache_path, \"r\", encoding=\"utf-8\") as f:\n                cached_data = json.load(f)\n                for item in cached_data:\n                    cache_map[(item.get(\"file\"), item.get(\"name\"))] = item.get(\"summary\", \"\")\n        except Exception:\n            pass\n            \n    api_key = get_nvidia_api_key()\n    for func in all_functions:\n        cache_key = (func[\"file\"], func[\"name\"])\n        if cache_key in cache_map and cache_map[cache_key]:\n            func[\"summary\"] = cache_map[cache_key]\n        else:\n            if api_key:\n                prompt = f\"Write a 1-sentence summary of what this python function does:\\n\\n{func['code']}\"\n                sys_prompt = \"You are a compiler that outputs a single short sentence explaining a function.\"\n                summary = query_nvidia(prompt, sys_prompt)\n                if \"NVIDIA API Error\" in summary:\n                    summary = generate_fallback_summary(func)\n            else:\n                summary = generate_fallback_summary(func)\n            func[\"summary\"] = summary\n            \n    try:\n        with open(cache_path, \"w\", encoding=\"utf-8\") as f:\n            json.dump(all_functions, f, indent=2)\n    except Exception:\n        pass\n        \n    return all_functions",
+    "code": "def build_meaningful_map(dirpath: str) -> list:\n    ignored_dirs = {'.git', '__pycache__', '.gemini', 'venv', '.venv', 'env', '.env', 'build', 'dist'}\n    all_functions = []\n    \n    for root, dirs, files in os.walk(dirpath):\n        dirs[:] = [d for d in dirs if d not in ignored_dirs]\n        for f in files:\n            if f.endswith(\".py\"):\n                filepath = os.path.join(root, f)\n                all_functions.extend(get_functions_from_file(filepath))\n                \n    cache_path = os.path.join(dirpath, \"repo_meaningful_map.json\")\n    cache_map = {}\n    if os.path.exists(cache_path):\n        try:\n            with open(cache_path, \"r\", encoding=\"utf-8\") as f:\n                cached_data = json.load(f)\n                for item in cached_data:\n                    cache_map[(item.get(\"file\"), item.get(\"name\"))] = (item.get(\"summary\", \"\"), item.get(\"hash\", \"\"))\n        except Exception:\n            pass\n            \n    api_key = get_nvidia_api_key()\n    import hashlib\n    \n    for func in all_functions:\n        func_hash = hashlib.md5(func[\"code\"].encode(\"utf-8\")).hexdigest()\n        func[\"hash\"] = func_hash\n        \n        cache_key = (func[\"file\"], func[\"name\"])\n        if cache_key in cache_map:\n            cached_summary, cached_hash = cache_map[cache_key]\n            if cached_summary and cached_hash == func_hash:\n                func[\"summary\"] = cached_summary\n                continue\n                \n        # Cache miss or hash mismatch: regenerate summary\n        if api_key:\n            prompt = f\"Write a 1-sentence summary of what this python function does:\\n\\n{func['code']}\"\n            sys_prompt = \"You are a compiler that outputs a single short sentence explaining a function.\"\n            summary = query_nvidia(prompt, sys_prompt)\n            if \"NVIDIA API Error\" in summary:\n                summary = generate_fallback_summary(func)\n        else:\n            summary = generate_fallback_summary(func)\n        func[\"summary\"] = summary\n            \n    try:\n        with open(cache_path, \"w\", encoding=\"utf-8\") as f:\n            json.dump(all_functions, f, indent=2)\n    except Exception:\n        pass\n        \n    return all_functions",
     "file": "code_reviewer.py",
     "filepath": ".\\tools\\code_reviewer.py",
+    "hash": "b00549771d2df8fc020f0fe065748956",
     "summary": "Build meaningful map in code_reviewer.py."
   },
   {
@@ -258,6 +286,7 @@
     "code": "    def __init__(self, documents: list):\n        self.documents = documents\n        self.vocab = set()\n        self.idf = {}\n        self.vectors = []\n        self._build()",
     "file": "code_reviewer.py",
     "filepath": ".\\tools\\code_reviewer.py",
+    "hash": "c5328b4e691adc9107df85eed40a2443",
     "summary": "  init   in code_reviewer.py."
   },
   {
@@ -267,6 +296,7 @@
     "code": "    def _build(self):\n        tokenized_docs = []\n        for doc in self.documents:\n            text_context = f\"{doc['name']} {doc['summary']} {doc['code']}\"\n            tokens = tokenize(text_context)\n            tokenized_docs.append(tokens)\n            self.vocab.update(tokens)\n            \n        N = len(self.documents)\n        for word in self.vocab:\n            df = sum(1 for tokens in tokenized_docs if word in tokens)\n            self.idf[word] = math.log(1 + N / (1 + df))\n            \n        for tokens in tokenized_docs:\n            vector = self._vectorize(tokens)\n            self.vectors.append(vector)",
     "file": "code_reviewer.py",
     "filepath": ".\\tools\\code_reviewer.py",
+    "hash": "00c60c54fad64286d2bfef4a5d962598",
     "summary": " build in code_reviewer.py."
   },
   {
@@ -276,6 +306,7 @@
     "code": "    def _vectorize(self, tokens: List[str]) -> Dict[str, float]:\n        tf = Counter(tokens)\n        vector = {}\n        for word, count in tf.items():\n            if word in self.idf:\n                vector[word] = count * self.idf[word]\n        sq_sum = sum(val**2 for val in vector.values())\n        if sq_sum > 0:\n            norm = math.sqrt(sq_sum)\n            for word in vector:\n                vector[word] /= norm\n        return vector",
     "file": "code_reviewer.py",
     "filepath": ".\\tools\\code_reviewer.py",
+    "hash": "8b6d42f59a51d1bacbbac5100d0f7f8f",
     "summary": " vectorize in code_reviewer.py."
   },
   {
@@ -285,6 +316,7 @@
     "code": "    def search(self, query: str, top_k: int = 3) -> list:\n        query_tokens = tokenize(query)\n        query_vec = self._vectorize(query_tokens)\n        \n        results = []\n        for i, doc in enumerate(self.documents):\n            doc_vec = self.vectors[i]\n            dot = sum(query_vec.get(w, 0) * doc_vec.get(w, 0) for w in query_vec)\n            results.append((dot, doc))\n            \n        results.sort(key=lambda x: x[0], reverse=True)\n        return [doc for score, doc in results if score > 0.05][:top_k]",
     "file": "code_reviewer.py",
     "filepath": ".\\tools\\code_reviewer.py",
+    "hash": "b4d625c3d32e2c1cf73892712a20bf30",
     "summary": "Search in code_reviewer.py."
   },
   {
@@ -294,6 +326,7 @@
     "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        target = \".\"\n        words = re.findall(r'[a-zA-Z0-9_\\.\\-\\/\\\\:]+', prompt)\n        for word in words:\n            if os.path.exists(word):\n                target = word\n                break\n                \n        target_abs = os.path.abspath(target)\n        \n        is_qa_request = \"Codebase QA\" in low_levels or any(\n            kw in prompt.lower() for kw in [\"our codebase\", \"this codebase\", \"this project\", \"in this repository\", \"how does our\", \"explain our\", \"how does the codebase\", \"how is our\", \"where does our\"]\n        )\n        is_arch_request = \"Architecture Review\" in low_levels or any(\n            kw in prompt.lower() for kw in [\"skeleton\", \"skeletonize\", \"repomix\", \"pack\", \"map\", \"structure\"]\n        )\n        \n        if is_qa_request:\n            dir_to_scan = target_abs if os.path.isdir(target_abs) else os.path.dirname(target_abs)\n            meaningful_map = build_meaningful_map(dir_to_scan)\n            \n            search_engine = CodeSearchEngine(meaningful_map)\n            matched_funcs = search_engine.search(prompt, top_k=3)\n            \n            header = f\"[QA] [CodeReviewerTool QA Pipeline Activated] for codebase in: {os.path.basename(dir_to_scan)}\\n\"\n            header += f\"   -> Found {len(meaningful_map)} functions in codebase.\\n\"\n            if matched_funcs:\n                header += f\"   -> Identified {len(matched_funcs)} functions matching query:\\n\"\n                for f in matched_funcs:\n                    header += f\"      * File: {f['file']} | Signature: {f['signature']} | Summary: {f['summary']}\\n\"\n            else:\n                header += f\"   -> No highly matching functions identified for search query.\\n\"\n                \n            api_key = get_nvidia_api_key()\n            if api_key and matched_funcs:\n                code_context = \"<codebase_context>\\n\"\n                for f in matched_funcs:\n                    code_context += (\n                        f\"  <function file=\\\"{f['file']}\\\" name=\\\"{f['name']}\\\" signature=\\\"{f['signature']}\\\">\\n\"\n                        f\"    <summary>{f['summary']}</summary>\\n\"\n                        f\"    <code>\\n{f['code']}\\n    </code>\\n\"\n                        f\"  </function>\\n\"\n                    )\n                code_context += \"</codebase_context>\"\n                \n                llm_prompt = (\n                    f\"You are an expert software engineer. Based on the following source code context in XML, answer the user's question.\\n\\n\"\n                    f\"<user_question>\\n{prompt}\\n</user_question>\\n\\n\"\n                    f\"{code_context}\\n\\n\"\n                    f\"Provide a clear, detailed, and accurate explanation.\"\n                )\n                sys_prompt = \"You are a software architect explaining system design based on function implementations.\"\n                \n                analysis_res = query_nvidia(llm_prompt, sys_prompt)\n                output = f\"{header}\\n--- Final Analysis (NVIDIA NIM) ---\\n{analysis_res}\"\n            else:\n                fallback_res = \"\"\n                if not api_key:\n                    fallback_res += \"   -> Note: NVIDIA_API_KEY is not set. Displaying matching function source codes directly:\\n\\n\"\n                else:\n                    fallback_res += \"   -> Note: Displaying matching function source codes directly:\\n\\n\"\n                \n                for f in matched_funcs:\n                    fallback_res += f\"*** File: {f['file']} | {f['signature']} ***\\n{f['code']}\\n\" + \"=\"*50 + \"\\n\"\n                output = f\"{header}\\n{fallback_res}\"\n                \n        elif is_arch_request:\n            if os.path.isfile(target_abs):\n                return f\"[DESIGN] [CodeReviewerTool Activated] Codebase Skeletonizer target must be a directory. Target specified is a file: {os.path.basename(target_abs)}\"\n            \n            output_xml = self._generate_skeleton_xml(target_abs)\n            output_file = os.path.join(target_abs, \"repo_skeleton.xml\")\n            try:\n                with open(output_file, \"w\", encoding=\"utf-8\") as f:\n                    f.write(output_xml)\n                status_str = f\"Saved XML context map to: {output_file}\"\n            except Exception as e:\n                status_str = f\"Failed to save XML context file: {str(e)}\"\n                \n            preview_lines = output_xml.splitlines()[:25]\n            preview = \"\\n\".join([\"      \" + l for l in preview_lines])\n            \n            report = [\n                f\"[DESIGN] [CodeReviewerTool Activated] Codebase Skeletonizer completed for: {os.path.basename(target_abs)}\",\n                f\"   -> Status: {status_str}\",\n                f\"   -> XML Preview (First 25 lines):\",\n                preview,\n                f\"      ... (XML file truncated, check '{os.path.basename(output_file)}' for full content)\"\n            ]\n            output = \"\\n\".join(report)\n        else:\n            if os.path.isfile(target_abs):\n                res = self.analyze_file(target_abs)\n                report = [\n                    f\"[REVIEW] [CodeReviewerTool Activated] File Analysis for: {os.path.basename(target_abs)}\",\n                    f\"   -> Total Lines: {res['lines']}\",\n                    f\"   -> Classes: {res['classes']}\",\n                    f\"   -> Functions: {res['functions']}\",\n                    f\"   -> Security Alerts ({len(res['security_issues'])}):\",\n                ]\n                if res['security_issues']:\n                    for iss in res['security_issues']:\n                        report.append(f\"      [!] {iss}\")\n                else:\n                    report.append(\"      No security threats found.\")\n                    \n                report.append(f\"   -> Readability Recommendations ({len(res['style_issues'])}):\")\n                if res['style_issues']:\n                    for iss in res['style_issues']:\n                        report.append(f\"      [*] {iss}\")\n                else:\n                    report.append(\"      Style conventions followed.\")\n                \n                output = \"\\n\".join(report)\n            else:\n                output = self.analyze_codebase(target_abs)\n            \n        return output.encode('ascii', 'ignore').decode('ascii')",
     "file": "code_reviewer.py",
     "filepath": ".\\tools\\code_reviewer.py",
+    "hash": "a0ddf9b41a14e1e29a69965b2ba58983",
     "summary": "Execute in code_reviewer.py."
   },
   {
@@ -303,6 +336,7 @@
     "code": "    def _get_ast_skeleton(self, filepath: str) -> dict:\n        skeleton = {\n            \"summary\": \"\",\n            \"imports\": [],\n            \"classes\": [],\n            \"functions\": []\n        }\n        try:\n            with open(filepath, \"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n                code = f.read()\n            tree = ast.parse(code)\n            \n            docstring = ast.get_docstring(tree)\n            if docstring:\n                skeleton[\"summary\"] = docstring.strip()\n                \n            for node in tree.body:\n                if isinstance(node, ast.Import):\n                    for alias in node.names:\n                        skeleton[\"imports\"].append(f\"import {alias.name}\")\n                elif isinstance(node, ast.ImportFrom):\n                    module = node.module or \"\"\n                    names = \", \".join(alias.name for alias in node.names)\n                    skeleton[\"imports\"].append(f\"from {module} import {names}\")\n                elif isinstance(node, ast.ClassDef):\n                    class_info = {\n                        \"name\": node.name,\n                        \"bases\": [ast.unparse(b) for b in node.bases],\n                        \"docstring\": ast.get_docstring(node) or \"\",\n                        \"methods\": []\n                    }\n                    for sub_node in node.body:\n                        if isinstance(sub_node, ast.FunctionDef) or isinstance(sub_node, ast.AsyncFunctionDef):\n                            sig = self._get_function_signature(sub_node)\n                            class_info[\"methods\"].append({\n                                \"signature\": sig,\n                                \"docstring\": ast.get_docstring(sub_node) or \"\"\n                            })\n                    skeleton[\"classes\"].append(class_info)\n                elif isinstance(node, ast.FunctionDef) or isinstance(node, ast.AsyncFunctionDef):\n                    sig = self._get_function_signature(node)\n                    skeleton[\"functions\"].append({\n                        \"signature\": sig,\n                        \"docstring\": ast.get_docstring(node) or \"\"\n                    })\n        except Exception as e:\n            skeleton[\"summary\"] = f\"Failed to parse AST: {str(e)}\"\n        return skeleton",
     "file": "code_reviewer.py",
     "filepath": ".\\tools\\code_reviewer.py",
+    "hash": "d2108d8f49b75092b50a7bac251b22e8",
     "summary": " get ast skeleton in code_reviewer.py."
   },
   {
@@ -312,6 +346,7 @@
     "code": "    def _get_function_signature(self, node) -> str:\n        is_async = isinstance(node, ast.AsyncFunctionDef)\n        prefix = \"async def \" if is_async else \"def \"\n        try:\n            args_str = ast.unparse(node.args)\n        except Exception:\n            args_str = \"\"\n        ret_str = \"\"\n        if node.returns:\n            try:\n                ret_str = f\" -> {ast.unparse(node.returns)}\"\n            except Exception:\n                pass\n        return f\"{prefix}{node.name}({args_str}){ret_str}\"",
     "file": "code_reviewer.py",
     "filepath": ".\\tools\\code_reviewer.py",
+    "hash": "6e20db827a6ffc82e8e348c995261c10",
     "summary": " get function signature in code_reviewer.py."
   },
   {
@@ -321,6 +356,7 @@
     "code": "    def _generate_skeleton_xml(self, dirpath: str) -> str:\n        root_el = ET.Element(\"repository_map\")\n        ignored_dirs = {'.git', '__pycache__', '.gemini', 'venv', '.venv', 'env', '.env', 'build', 'dist'}\n        \n        tree_lines = []\n        py_files = []\n        \n        for root, dirs, files in os.walk(dirpath):\n            dirs[:] = [d for d in dirs if d not in ignored_dirs]\n            level = root.replace(dirpath, '').count(os.sep)\n            indent = '  ' * level\n            subfolder = os.path.basename(root)\n            if subfolder and subfolder != os.path.basename(dirpath):\n                tree_lines.append(f\"{indent}- {subfolder}/\")\n                \n            sub_indent = '  ' * (level + 1)\n            for f in files:\n                ext = os.path.splitext(f)[1].lower()\n                tree_lines.append(f\"{sub_indent}- {f}\")\n                if ext == '.py':\n                    py_files.append(os.path.join(root, f))\n                    \n        map_el = ET.SubElement(root_el, \"structure\")\n        map_el.text = \"\\n\" + \"\\n\".join(tree_lines) + \"\\n\"\n        \n        for filepath in py_files:\n            rel_path = os.path.relpath(filepath, dirpath)\n            skeleton = self._get_ast_skeleton(filepath)\n            \n            file_el = ET.SubElement(root_el, \"file\", path=rel_path)\n            summary_el = ET.SubElement(file_el, \"summary\")\n            summary_el.text = skeleton[\"summary\"] or \"No file-level description.\"\n            \n            if skeleton[\"imports\"]:\n                imports_el = ET.SubElement(file_el, \"imports\")\n                for imp in skeleton[\"imports\"]:\n                    imp_el = ET.SubElement(imports_el, \"import_statement\")\n                    imp_el.text = imp\n                    \n            if skeleton[\"classes\"]:\n                classes_el = ET.SubElement(file_el, \"classes\")\n                for cls in skeleton[\"classes\"]:\n                    cls_el = ET.SubElement(classes_el, \"class\")\n                    sig_el = ET.SubElement(cls_el, \"class_signature\")\n                    bases_str = f\"({', '.join(cls['bases'])})\" if cls['bases'] else \"\"\n                    sig_el.text = f\"class {cls['name']}{bases_str}\"\n                    \n                    doc_el = ET.SubElement(cls_el, \"docstring\")\n                    doc_el.text = cls[\"docstring\"] or \"No class description.\"\n                    \n                    if cls[\"methods\"]:\n                        methods_el = ET.SubElement(cls_el, \"methods\")\n                        for method in cls[\"methods\"]:\n                            meth_el = ET.SubElement(methods_el, \"method\")\n                            msig_el = ET.SubElement(meth_el, \"method_signature\")\n                            msig_el.text = method[\"signature\"]\n                            mdoc_el = ET.SubElement(meth_el, \"docstring\")\n                            mdoc_el.text = method[\"docstring\"] or \"No method description.\"\n                            \n            if skeleton[\"functions\"]:\n                funcs_el = ET.SubElement(file_el, \"functions\")\n                for func in skeleton[\"functions\"]:\n                    func_el = ET.SubElement(funcs_el, \"function\")\n                    fsig_el = ET.SubElement(func_el, \"function_signature\")\n                    fsig_el.text = func[\"signature\"]\n                    fdoc_el = ET.SubElement(func_el, \"docstring\")\n                    fdoc_el.text = func[\"docstring\"] or \"No function description.\"\n                    \n        xml_str = ET.tostring(root_el, encoding='utf-8')\n        parsed_xml = minidom.parseString(xml_str)\n        pretty_xml = parsed_xml.toprettyxml(indent=\"  \")\n        return pretty_xml",
     "file": "code_reviewer.py",
     "filepath": ".\\tools\\code_reviewer.py",
+    "hash": "ab49d05bf880b5fa3a09cf0988d7f51f",
     "summary": " generate skeleton xml in code_reviewer.py."
   },
   {
@@ -330,6 +366,7 @@
     "code": "    def analyze_file(self, filepath: str) -> dict:\n        metrics = {\n            \"lines\": 0,\n            \"classes\": 0,\n            \"functions\": 0,\n            \"security_issues\": [],\n            \"style_issues\": []\n        }\n        try:\n            with open(filepath, \"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n                lines = f.readlines()\n                \n            metrics[\"lines\"] = len(lines)\n            \n            secret_pattern = re.compile(r'(api_key|secret|password|passwd|token|credentials)\\s*=\\s*[\\'\"][a-zA-Z0-9_\\-]{8,}[\\'\"]', re.IGNORECASE)\n            eval_pattern = re.compile(r'\\b(eval|exec)\\b')\n            unsafe_subproc = re.compile(r'\\bsubprocess\\.(Popen|run|call)\\(.*shell\\s*=\\s*True')\n            weak_hash = re.compile(r'\\b(md5|sha1)\\b')\n            \n            in_function = False\n            func_line_count = 0\n            func_name = \"\"\n            \n            for i, line in enumerate(lines, 1):\n                line_str = line.strip()\n                if line_str.startswith(\"class \"):\n                    metrics[\"classes\"] += 1\n                elif line_str.startswith(\"def \"):\n                    metrics[\"functions\"] += 1\n                    func_name = line_str.split(\"(\")[0].replace(\"def \", \"\").strip()\n                    in_function = True\n                    func_line_count = 0\n                    \n                    has_doc = False\n                    for j in range(i, min(i + 3, len(lines))):\n                        next_line = lines[j].strip()\n                        if next_line.startswith('\"\"\"') or next_line.startswith(\"'''\"):\n                            has_doc = True\n                            break\n                    if not has_doc:\n                        metrics[\"style_issues\"].append(f\"Line {i}: Function '{func_name}' is missing a docstring.\")\n                \n                if in_function:\n                    if line_str == \"\" or line_str.startswith(\"#\"):\n                        pass\n                    else:\n                        func_line_count += 1\n                        if i < len(lines):\n                            next_line = lines[i]\n                            if next_line.strip() and not next_line.startswith(\" \") and not next_line.startswith(\"\\t\") and not next_line.startswith(\"#\"):\n                                in_function = False\n                                if func_line_count > 40:\n                                    metrics[\"style_issues\"].append(f\"Function '{func_name}' is long ({func_line_count} logic lines). Consider refactoring.\")\n                \n                if secret_pattern.search(line):\n                    metrics[\"security_issues\"].append(f\"Line {i}: Potential hardcoded secret/key detected.\")\n                if eval_pattern.search(line):\n                    metrics[\"security_issues\"].append(f\"Line {i}: Use of unsafe 'eval' or 'exec' detected.\")\n                if unsafe_subproc.search(line):\n                    metrics[\"security_issues\"].append(f\"Line {i}: Unsafe shell execution via subprocess detected.\")\n                if weak_hash.search(line):\n                    metrics[\"security_issues\"].append(f\"Line {i}: Weak hashing algorithm (md5/sha1) detected.\")\n        except Exception as e:\n            metrics[\"security_issues\"].append(f\"Error reading file: {str(e)}\")\n        return metrics",
     "file": "code_reviewer.py",
     "filepath": ".\\tools\\code_reviewer.py",
+    "hash": "3456e42d8cf66cefdd44a1106abb56f3",
     "summary": "Analyze file in code_reviewer.py."
   },
   {
@@ -339,6 +376,7 @@
     "code": "    def analyze_codebase(self, dirpath: str) -> str:\n        summary = []\n        summary.append(f\"[REVIEW] [CodeReviewerTool Activated] Codebase Analysis for: {os.path.basename(dirpath)}\")\n        \n        file_types = {}\n        total_files = 0\n        total_lines = 0\n        total_classes = 0\n        total_funcs = 0\n        \n        all_security_issues = []\n        all_style_issues = []\n        \n        ignored_dirs = {'.git', '__pycache__', '.gemini', 'venv', '.venv', 'env', '.env', 'build', 'dist'}\n        \n        tree_lines = []\n        for root, dirs, files in os.walk(dirpath):\n            dirs[:] = [d for d in dirs if d not in ignored_dirs]\n            \n            level = root.replace(dirpath, '').count(os.sep)\n            indent = '  ' * level\n            subfolder = os.path.basename(root)\n            if subfolder and subfolder != os.path.basename(dirpath):\n                tree_lines.append(f\"{indent}[] {subfolder}/\")\n                \n            sub_indent = '  ' * (level + 1)\n            for f in files:\n                total_files += 1\n                ext = os.path.splitext(f)[1].lower() or \"no_extension\"\n                file_types[ext] = file_types.get(ext, 0) + 1\n                \n                if level < 2:\n                    tree_lines.append(f\"{sub_indent}- {f}\")\n                    \n                if ext == '.py':\n                    filepath = os.path.join(root, f)\n                    metrics = self.analyze_file(filepath)\n                    total_lines += metrics[\"lines\"]\n                    total_classes += metrics[\"classes\"]\n                    total_funcs += metrics[\"functions\"]\n                    \n                    for issue in metrics[\"security_issues\"]:\n                        all_security_issues.append(f\"{f} -> {issue}\")\n                    for issue in metrics[\"style_issues\"]:\n                        all_style_issues.append(f\"{f} -> {issue}\")\n                        \n        summary.append(\"   -> Directory Layout (Max Depth 2):\")\n        summary.append(\"\\n\".join([\"      \" + l for l in tree_lines[:25]]))\n        if len(tree_lines) > 25:\n            summary.append(\"      ... (directory tree truncated)\")\n            \n        summary.append(\"   -> File Extensions Summary:\")\n        for ext, count in sorted(file_types.items(), key=lambda x: x[1], reverse=True):\n            summary.append(f\"      {ext or 'no_ext'}: {count} files\")\n            \n        summary.append(f\"   -> Code Metrics:\")\n        summary.append(f\"      Total Python Files: {file_types.get('.py', 0)}\")\n        summary.append(f\"      Total Lines of Code: {total_lines}\")\n        summary.append(f\"      Total Classes: {total_classes}\")\n        summary.append(f\"      Total Functions: {total_funcs}\")\n        \n        summary.append(f\"   -> Security Flags Detected ({len(all_security_issues)}):\")\n        if all_security_issues:\n            for issue in all_security_issues[:10]:\n                summary.append(f\"      [!] {issue}\")\n            if len(all_security_issues) > 10:\n                summary.append(f\"      ... and {len(all_security_issues) - 10} more security warnings.\")\n        else:\n            summary.append(\"      No critical security issues found.\")\n            \n        summary.append(f\"   -> Code Style Recommendations ({len(all_style_issues)}):\")\n        if all_style_issues:\n            for issue in all_style_issues[:10]:\n                summary.append(f\"      [*] {issue}\")\n            if len(all_style_issues) > 10:\n                summary.append(f\"      ... and {len(all_style_issues) - 10} more linter warnings.\")\n        else:\n            summary.append(\"      Code readability looks good.\")\n            \n        return \"\\n\".join(summary)",
     "file": "code_reviewer.py",
     "filepath": ".\\tools\\code_reviewer.py",
+    "hash": "fc71dc7fe7220ca5dabd475b8e488fe5",
     "summary": "Analyze codebase in code_reviewer.py."
   },
   {
@@ -348,6 +386,7 @@
     "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        return (\n            f\"[DEBUG] [DebuggerTool Activated] analyzing error report: {low_levels}\\n\"\n            f\"   -> Diagnosis: Identified runtime/syntax anomaly.\\n\"\n            f\"   -> Fix Recommendation: Inspect your parameters, clear node_modules, and update target references.\"\n        )",
     "file": "debugger.py",
     "filepath": ".\\tools\\debugger.py",
+    "hash": "b4b4135af9fac207865aff0aa6a46446",
     "summary": "Execute in debugger.py."
   },
   {
@@ -357,6 +396,7 @@
     "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        return (\n            f\"[CHAT] [DefaultAgentChat Activated]\\n\"\n            f\"   -> Chat Context: {low_levels}\\n\"\n            f\"   -> Response: Hello! How can I assist you with your project today?\"\n        )",
     "file": "default_chat.py",
     "filepath": ".\\tools\\default_chat.py",
+    "hash": "20e487a45faac2e58e33dfb299535153",
     "summary": "Execute in default_chat.py."
   },
   {
@@ -366,6 +406,7 @@
     "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        return (\n            f\"[DEPLOY] [DeploymentTool Activated] setting up deployment config for: {low_levels}\\n\"\n            f\"   -> Config created: Dockerfile / Docker-compose / CI-CD pipeline yaml\\n\"\n            f\"   -> Output: Config files generated successfully.\"\n        )",
     "file": "deployment.py",
     "filepath": ".\\tools\\deployment.py",
+    "hash": "6fd437dfd389926b414a673c2a2433ab",
     "summary": "Execute in deployment.py."
   },
   {
@@ -375,6 +416,7 @@
     "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        return (\n            f\"[DOCUMENT] [DocumentationTool Activated] generating documentation for: {low_levels}\\n\"\n            f\"   -> Document formats: README.md, Docstrings, OpenAPI specs\\n\"\n            f\"   -> Result: Created comprehensive documentation.\"\n        )",
     "file": "documentation.py",
     "filepath": ".\\tools\\documentation.py",
+    "hash": "35113b954953f894c16d67cf0ac63b33",
     "summary": "Execute in documentation.py."
   },
   {
@@ -384,6 +426,7 @@
     "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        return (\n            f\"[DESIGN] [SystemDesignTool Activated] generating architecture blueprints for: {low_levels}\\n\"\n            f\"   -> System Blueprint: Scalable Architecture Block\\n\"\n            f\"   -> Components: Client -> API Gateway -> Microservices -> Cache Layer -> Database\"\n        )",
     "file": "system_design.py",
     "filepath": ".\\tools\\system_design.py",
+    "hash": "9d9d50ace74c466340e3f26ef0ff1eac",
     "summary": "Execute in system_design.py."
   },
   {
@@ -393,6 +436,7 @@
     "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        return (\n            f\"[TEST] [TestGeneratorTool Activated] creating tests for: {low_levels}\\n\"\n            f\"   -> Strategy: Generated mock unit/integration assertions\\n\"\n            f\"   -> Output: Added test suite files containing test_cases matching input functions.\"\n        )",
     "file": "test_generator.py",
     "filepath": ".\\tools\\test_generator.py",
+    "hash": "ea915b797df450fb9eb0d3a3808c6271",
     "summary": "Execute in test_generator.py."
   },
   {
@@ -402,6 +446,7 @@
     "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        try:\n            query = prompt.strip()\n            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}\n            url = f\"https://html.duckduckgo.com/html/?q={urllib.parse.quote(query)}\"\n            req = urllib.request.Request(url, headers=headers)\n            \n            with urllib.request.urlopen(req, timeout=10) as r:\n                html = r.read().decode('utf-8', errors='ignore')\n                \n            snippets = re.findall(r'<a class=\"result__snippet\"[^>]*>(.*?)</a>', html, re.DOTALL)\n            if not snippets:\n                snippets = re.findall(r'result__snippet[^>]*>(.*?)</a>', html, re.DOTALL)\n                \n            if not snippets:\n                return f\"[SEARCH] [WebSearchTool Activated] No live results found on web for: '{query}'.\"\n                \n            results = []\n            for i, s in enumerate(snippets[:3]):\n                clean_snippet = re.sub(r'<[^>]+>', '', s)\n                clean_snippet = clean_snippet.replace('&quot;', '\"').replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')\n                clean_snippet = clean_snippet.encode('ascii', 'ignore').decode('ascii')\n                results.append(f\"   {i+1}. {clean_snippet.strip()}\")\n                \n            summary = \"\\n\".join(results)\n            return (\n                f\"[SEARCH] [WebSearchTool Activated] Live web results for query: '{query}'\\n\"\n                f\"{summary}\"\n            )\n        except Exception as e:\n            return f\"[SEARCH] [WebSearchTool Activated] Error running web search: {str(e)}\"",
     "file": "web_search.py",
     "filepath": ".\\tools\\web_search.py",
+    "hash": "f857e16c693e19d0e7c7bc7516c2a1bc",
     "summary": "Execute in web_search.py."
   }
 ]
