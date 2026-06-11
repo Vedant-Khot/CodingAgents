@@ -10,20 +10,67 @@ from typing import List, Dict
 from tools.base import BaseTool, get_nvidia_api_key, query_nvidia, tokenize
 
 # ==========================================
-# THE SCOUT: AST CODESPAN EXTRACTION
+# THE SCOUT: CALL GRAPH & SKELETON EXTRACTION
 # ==========================================
 
-def get_functions_from_file(filepath: str) -> list:
-    functions = []
+def get_calls_from_node(node) -> list:
+    """Traverses the AST node of a function to identify all function and method calls."""
+    calls = []
+    for sub_node in ast.walk(node):
+        if isinstance(sub_node, ast.Call):
+            try:
+                call_name = ast.unparse(sub_node.func).strip()
+                if call_name and call_name not in calls:
+                    calls.append(call_name)
+            except Exception:
+                pass
+    return calls
+
+def scan_file_structure(filepath: str) -> list:
+    """Parses a Python file using AST to extract top-level functions and classes with their methods."""
+    items = []
     try:
         with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
             code = f.read()
-            
         tree = ast.parse(code)
         lines = code.splitlines()
         
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        for node in tree.body:
+            if isinstance(node, ast.ClassDef):
+                class_item = {
+                    "type": "class",
+                    "name": node.name,
+                    "file": os.path.basename(filepath),
+                    "filepath": filepath,
+                    "bases": [ast.unparse(b) for b in node.bases],
+                    "docstring": ast.get_docstring(node) or "",
+                    "methods": []
+                }
+                for sub_node in node.body:
+                    if isinstance(sub_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        start_line = sub_node.lineno - 1
+                        end_line = getattr(sub_node, "end_lineno", len(lines))
+                        func_code = "\n".join(lines[start_line:end_line])
+                        
+                        try:
+                            args_str = ast.unparse(sub_node.args)
+                        except Exception:
+                            args_str = ""
+                        ret_str = f" -> {ast.unparse(sub_node.returns)}" if sub_node.returns else ""
+                        sig = f"def {sub_node.name}({args_str}){ret_str}"
+                        
+                        method_calls = get_calls_from_node(sub_node)
+                        
+                        class_item["methods"].append({
+                            "name": sub_node.name,
+                            "signature": sig,
+                            "docstring": ast.get_docstring(sub_node) or "",
+                            "code": func_code,
+                            "calls": method_calls
+                        })
+                items.append(class_item)
+                
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 start_line = node.lineno - 1
                 end_line = getattr(node, "end_lineno", len(lines))
                 func_code = "\n".join(lines[start_line:end_line])
@@ -35,17 +82,21 @@ def get_functions_from_file(filepath: str) -> list:
                 ret_str = f" -> {ast.unparse(node.returns)}" if node.returns else ""
                 sig = f"def {node.name}({args_str}){ret_str}"
                 
-                functions.append({
+                func_calls = get_calls_from_node(node)
+                
+                items.append({
+                    "type": "function",
                     "name": node.name,
+                    "file": os.path.basename(filepath),
+                    "filepath": filepath,
                     "signature": sig,
                     "docstring": ast.get_docstring(node) or "",
                     "code": func_code,
-                    "file": os.path.basename(filepath),
-                    "filepath": filepath
+                    "calls": func_calls
                 })
-    except Exception as e:
+    except Exception:
         pass
-    return functions
+    return items
 
 # ==========================================
 # THE LIBRARIAN: INDEXING & SUMMARIZATION
@@ -61,14 +112,14 @@ def generate_fallback_summary(func: dict) -> str:
 
 def build_meaningful_map(dirpath: str) -> list:
     ignored_dirs = {'.git', '__pycache__', '.gemini', 'venv', '.venv', 'env', '.env', 'build', 'dist'}
-    all_functions = []
+    all_items = []
     
     for root, dirs, files in os.walk(dirpath):
         dirs[:] = [d for d in dirs if d not in ignored_dirs]
         for f in files:
             if f.endswith(".py"):
                 filepath = os.path.join(root, f)
-                all_functions.extend(get_functions_from_file(filepath))
+                all_items.extend(scan_file_structure(filepath))
                 
     cache_path = os.path.join(dirpath, "repo_meaningful_map.json")
     cache_map = {}
@@ -77,42 +128,100 @@ def build_meaningful_map(dirpath: str) -> list:
             with open(cache_path, "r", encoding="utf-8") as f:
                 cached_data = json.load(f)
                 for item in cached_data:
-                    cache_map[(item.get("file"), item.get("name"))] = (item.get("summary", ""), item.get("hash", ""))
+                    file_name = item.get("file")
+                    if item.get("type") == "class":
+                        for method in item.get("methods", []):
+                            cache_map[(file_name, item.get("name"), method.get("name"))] = (method.get("summary", ""), method.get("hash", ""))
+                    elif item.get("type") == "function":
+                        cache_map[(file_name, None, item.get("name"))] = (item.get("summary", ""), item.get("hash", ""))
         except Exception:
             pass
             
     api_key = get_nvidia_api_key()
     import hashlib
     
-    for func in all_functions:
-        func_hash = hashlib.md5(func["code"].encode("utf-8")).hexdigest()
-        func["hash"] = func_hash
-        
-        cache_key = (func["file"], func["name"])
-        if cache_key in cache_map:
-            cached_summary, cached_hash = cache_map[cache_key]
-            if cached_summary and cached_hash == func_hash:
-                func["summary"] = cached_summary
-                continue
+    for item in all_items:
+        file_name = item["file"]
+        if item["type"] == "class":
+            class_name = item["name"]
+            for method in item["methods"]:
+                m_hash = hashlib.md5(method["code"].encode("utf-8")).hexdigest()
+                method["hash"] = m_hash
                 
-        # Cache miss or hash mismatch: regenerate summary
-        if api_key:
-            prompt = f"Write a 1-sentence summary of what this python function does:\n\n{func['code']}"
-            sys_prompt = "You are a compiler that outputs a single short sentence explaining a function."
-            summary = query_nvidia(prompt, sys_prompt)
-            if "NVIDIA API Error" in summary:
-                summary = generate_fallback_summary(func)
-        else:
-            summary = generate_fallback_summary(func)
-        func["summary"] = summary
+                cache_key = (file_name, class_name, method["name"])
+                if cache_key in cache_map:
+                    cached_summary, cached_hash = cache_map[cache_key]
+                    if cached_summary and cached_hash == m_hash:
+                        method["summary"] = cached_summary
+                        continue
+                        
+                if api_key:
+                    prompt = f"Write a 1-sentence summary of what the class method '{class_name}.{method['name']}' does:\n\n{method['code']}"
+                    sys_prompt = "You are a compiler that outputs a single short sentence explaining a class method."
+                    summary = query_nvidia(prompt, sys_prompt)
+                    if "NVIDIA API Error" in summary:
+                        summary = generate_fallback_summary(method)
+                else:
+                    summary = generate_fallback_summary(method)
+                method["summary"] = summary
+                
+        elif item["type"] == "function":
+            func_hash = hashlib.md5(item["code"].encode("utf-8")).hexdigest()
+            item["hash"] = func_hash
+            
+            cache_key = (file_name, None, item["name"])
+            if cache_key in cache_map:
+                cached_summary, cached_hash = cache_map[cache_key]
+                if cached_summary and cached_hash == func_hash:
+                    item["summary"] = cached_summary
+                    continue
+                    
+            if api_key:
+                prompt = f"Write a 1-sentence summary of what the python function '{item['name']}' does:\n\n{item['code']}"
+                sys_prompt = "You are a compiler that outputs a single short sentence explaining a function."
+                summary = query_nvidia(prompt, sys_prompt)
+                if "NVIDIA API Error" in summary:
+                    summary = generate_fallback_summary(item)
+            else:
+                summary = generate_fallback_summary(item)
+            item["summary"] = summary
             
     try:
         with open(cache_path, "w", encoding="utf-8") as f:
-            json.dump(all_functions, f, indent=2)
+            json.dump(all_items, f, indent=2)
     except Exception:
         pass
         
-    return all_functions
+    return all_items
+
+def flatten_meaningful_map(meaningful_map: list) -> list:
+    """Flattens the structured classes and functions map into separate document dicts for the search engine."""
+    flat_docs = []
+    for item in meaningful_map:
+        if item["type"] == "class":
+            for m in item["methods"]:
+                flat_docs.append({
+                    "type": "method",
+                    "class_name": item["name"],
+                    "file": item["file"],
+                    "name": m["name"],
+                    "signature": m["signature"],
+                    "summary": m["summary"],
+                    "code": m["code"],
+                    "calls": m["calls"]
+                })
+        elif item["type"] == "function":
+            flat_docs.append({
+                "type": "function",
+                "class_name": None,
+                "file": item["file"],
+                "name": item["name"],
+                "signature": item["signature"],
+                "summary": item["summary"],
+                "code": item["code"],
+                "calls": item["calls"]
+            })
+    return flat_docs
 
 # ==========================================
 # THE SEARCH: TF-IDF SEMANTIC MATCHING
@@ -195,28 +304,45 @@ class CodeReviewerTool(BaseTool):
             dir_to_scan = target_abs if os.path.isdir(target_abs) else os.path.dirname(target_abs)
             meaningful_map = build_meaningful_map(dir_to_scan)
             
-            search_engine = CodeSearchEngine(meaningful_map)
+            # Flatten for search
+            flat_docs = flatten_meaningful_map(meaningful_map)
+            
+            search_engine = CodeSearchEngine(flat_docs)
             matched_funcs = search_engine.search(prompt, top_k=3)
             
             header = f"[QA] [CodeReviewerTool QA Pipeline Activated] for codebase in: {os.path.basename(dir_to_scan)}\n"
-            header += f"   -> Found {len(meaningful_map)} functions in codebase.\n"
+            header += f"   -> Found {len(meaningful_map)} classes/functions in codebase.\n"
             if matched_funcs:
-                header += f"   -> Identified {len(matched_funcs)} functions matching query:\n"
+                header += f"   -> Identified {len(matched_funcs)} items matching query:\n"
                 for f in matched_funcs:
-                    header += f"      * File: {f['file']} | Signature: {f['signature']} | Summary: {f['summary']}\n"
+                    if f["type"] == "method":
+                        header += f"      * Method: {f['class_name']}.{f['name']} | File: {f['file']} | Signature: {f['signature']} | Summary: {f['summary']}\n"
+                    else:
+                        header += f"      * Function: {f['name']} | File: {f['file']} | Signature: {f['signature']} | Summary: {f['summary']}\n"
             else:
-                header += f"   -> No highly matching functions identified for search query.\n"
+                header += f"   -> No highly matching items identified for search query.\n"
                 
             api_key = get_nvidia_api_key()
             if api_key and matched_funcs:
                 code_context = "<codebase_context>\n"
                 for f in matched_funcs:
-                    code_context += (
-                        f"  <function file=\"{f['file']}\" name=\"{f['name']}\" signature=\"{f['signature']}\">\n"
-                        f"    <summary>{f['summary']}</summary>\n"
-                        f"    <code>\n{f['code']}\n    </code>\n"
-                        f"  </function>\n"
-                    )
+                    calls_json = json.dumps(f.get("calls", []))
+                    if f["type"] == "method":
+                        code_context += (
+                            f"  <method class=\"{f['class_name']}\" file=\"{f['file']}\" name=\"{f['name']}\" signature=\"{f['signature']}\">\n"
+                            f"    <summary>{f['summary']}</summary>\n"
+                            f"    <calls>{calls_json}</calls>\n"
+                            f"    <code>\n{f['code']}\n    </code>\n"
+                            f"  </method>\n"
+                        )
+                    else:
+                        code_context += (
+                            f"  <function file=\"{f['file']}\" name=\"{f['name']}\" signature=\"{f['signature']}\">\n"
+                            f"    <summary>{f['summary']}</summary>\n"
+                            f"    <calls>{calls_json}</calls>\n"
+                            f"    <code>\n{f['code']}\n    </code>\n"
+                            f"  </function>\n"
+                        )
                 code_context += "</codebase_context>"
                 
                 llm_prompt = (
@@ -232,12 +358,16 @@ class CodeReviewerTool(BaseTool):
             else:
                 fallback_res = ""
                 if not api_key:
-                    fallback_res += "   -> Note: NVIDIA_API_KEY is not set. Displaying matching function source codes directly:\n\n"
+                    fallback_res += "   -> Note: NVIDIA_API_KEY is not set. Displaying matching items directly:\n\n"
                 else:
-                    fallback_res += "   -> Note: Displaying matching function source codes directly:\n\n"
+                    fallback_res += "   -> Note: Displaying matching items directly:\n\n"
                 
                 for f in matched_funcs:
-                    fallback_res += f"*** File: {f['file']} | {f['signature']} ***\n{f['code']}\n" + "="*50 + "\n"
+                    calls_str = ", ".join(f.get("calls", []))
+                    if f["type"] == "method":
+                        fallback_res += f"*** Method: {f['class_name']}.{f['name']} | {f['signature']} | Calls: [{calls_str}] ***\n{f['code']}\n" + "="*50 + "\n"
+                    else:
+                        fallback_res += f"*** Function: {f['name']} | {f['signature']} | Calls: [{calls_str}] ***\n{f['code']}\n" + "="*50 + "\n"
                 output = f"{header}\n{fallback_res}"
                 
         elif is_arch_request:
