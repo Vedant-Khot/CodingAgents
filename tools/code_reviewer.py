@@ -66,7 +66,8 @@ def scan_file_structure(filepath: str) -> list:
                             "signature": sig,
                             "docstring": ast.get_docstring(sub_node) or "",
                             "code": func_code,
-                            "calls": method_calls
+                            "calls": method_calls,
+                            "file": os.path.basename(filepath)
                         })
                 items.append(class_item)
                 
