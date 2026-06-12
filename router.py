@@ -15,6 +15,7 @@ from tools import (
     DeploymentTool,
     SystemDesignTool,
     DocumentationTool,
+    TerminalExecutorTool,
     DefaultAgentChat,
     get_nvidia_api_key,
     query_nvidia
@@ -190,6 +191,9 @@ class HierarchicalRouter:
         self.add_rule(IntentRule("Document", "API Docs", ["generate api docs", "swagger documentation"]))
         self.add_rule(IntentRule("Document", "Comments", ["add comments", "add docstrings", "explain inline"]))
 
+        # Execute rules
+        self.add_rule(IntentRule("Execute", "Command", ["run command", "execute terminal", "run shell", "terminal command", "run script", "execute command", "bash", "powershell", "cmd", "npm run", "pip install", "pytest"]))
+
     def add_rule(self, rule: IntentRule):
         self.rules.append(rule)
 
@@ -264,7 +268,14 @@ class HierarchicalRouter:
             # 10. Document
             {"text": "write readme md markdown documentation file repository documentation structure", "high": "Document", "low": "README"},
             {"text": "generate swagger openapi specs api docs document paths outputs queries", "high": "Document", "low": "API Docs"},
-            {"text": "add documentation code comments python docstrings explain logic inside methods", "high": "Document", "low": "Comments"}
+            {"text": "add documentation code comments python docstrings explain logic inside methods", "high": "Document", "low": "Comments"},
+            
+            # 11. Execute
+            {"text": "run npm test command to execute test suite", "high": "Execute", "low": "Command"},
+            {"text": "execute python script check results", "high": "Execute", "low": "Command"},
+            {"text": "run shell command list files directory", "high": "Execute", "low": "Command"},
+            {"text": "run git status in terminal", "high": "Execute", "low": "Command"},
+            {"text": "execute command to install pip requirements", "high": "Execute", "low": "Command"}
         ]
         self.similarity_engine = TfidfSimilarity(exemplars)
 
@@ -316,7 +327,7 @@ class AgenticPlanner:
         "You are an expert agent planner. Given a user's coding request and a list of available tools, "
         "your job is to break down the request into a structured sequence of execution steps.\n\n"
         "Each step in the plan must correspond to ONE tool. For each step, you must output:\n"
-        "- 'tool': The high-level intent key of the tool to use (must be one of: Learn, Build, Fix, Improve, Analyze, Convert, Test, Deploy, Design, Document, Default).\n"
+        "- 'tool': The high-level intent key of the tool to use (must be one of: Learn, Build, Fix, Improve, Analyze, Convert, Test, Deploy, Design, Document, Execute, Default).\n"
         "- 'description': A short sentence explaining what this step does.\n"
         "- 'prompt': The refined sub-prompt tailored for this specific tool.\n\n"
         "Return ONLY a valid JSON object with a single top-level key 'plan' containing the array of steps. "
@@ -387,6 +398,7 @@ class ToolOrchestrator:
         self.tools["Deploy"] = DeploymentTool("DeployerTool", "Creates deployment configuration pipelines.")
         self.tools["Design"] = SystemDesignTool("DesignTool", "Generates architectural systems designs.")
         self.tools["Document"] = DocumentationTool("DocTool", "Generates READMEs and API documentation.")
+        self.tools["Execute"] = TerminalExecutorTool("TerminalExecutorTool", "Executes terminal/shell commands and reads output.")
         # Fallback tool
         self.tools["Default"] = DefaultAgentChat("DefaultChat", "Standard conversational chatbot.")
 
@@ -491,7 +503,8 @@ if __name__ == "__main__":
     startup_tests = [
         "Create a Flutter login screen",
         "My App crashes with null pointer traceback",
-        "Convert Java code to Python and optimize it"
+        "Convert Java code to Python and optimize it",
+        "Run command `echo router_self_test`"
     ]
     
     print("--- Running Startup Self-Test ---")

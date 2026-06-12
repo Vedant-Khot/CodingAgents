@@ -9,4 +9,5 @@ from tools.test_generator import TestGeneratorTool
 from tools.deployment import DeploymentTool
 from tools.system_design import SystemDesignTool
 from tools.documentation import DocumentationTool
+from tools.terminal_executor import TerminalExecutorTool
 from tools.default_chat import DefaultAgentChat
