@@ -154,14 +154,14 @@
         "name": "_setup_rules",
         "signature": "def _setup_rules(self)",
         "docstring": "",
-        "code": "    def _setup_rules(self):\n        # Learn rules\n        self.add_rule(IntentRule(\"Learn\", \"Concept\", [\"what is a\", \"what is\", \"explain the\", \"explain\", \"how does\", \"concept of\"], [r\"\\bexplain\\s+[a-zA-Z0-9_-]+\"]))\n        self.add_rule(IntentRule(\"Learn\", \"Comparison\", [\"vs\", \"versus\", \"difference between\"]))\n        self.add_rule(IntentRule(\"Learn\", \"Tutorial\", [\"teach me\", \"tutorial for\", \"step by step guide\"]))\n        \n        # Build rules\n        self.add_rule(IntentRule(\"Build\", \"Frontend\", [\"login screen\", \"login page\", \"angular component\", \"css styling\", \"react widget\"]))\n        self.add_rule(IntentRule(\"Build\", \"Backend\", [\"write python code\", \"build python script\", \"node express server\", \"flask backend\"]))\n        self.add_rule(IntentRule(\"Build\", \"API\", [\"rest api\", \"graphql query\", \"express route\", \"api endpoint\"]))\n        self.add_rule(IntentRule(\"Build\", \"Database\", [\"sql table\", \"prisma schema\", \"database migration\"]))\n\n        # Fix rules\n        self.add_rule(IntentRule(\"Fix\", \"Error\", [\"why is this error\", \"app crashes\", \"uncaught exception\", \"traceback\", \"fails with\"]))\n        self.add_rule(IntentRule(\"Fix\", \"Bug\", [\"fix this bug\", \"incorrect output\", \"wrong calculations\"]))\n        self.add_rule(IntentRule(\"Fix\", \"Configuration\", [\"npm install error\", \"requirements.txt conflict\", \"webpack config\"]))\n\n        # Improve rules\n        self.add_rule(IntentRule(\"Improve\", \"Refactor\", [\"refactor this\", \"make this cleaner\", \"clean code\", \"improve readability\"]))\n        self.add_rule(IntentRule(\"Improve\", \"Optimize\", [\"optimize this\", \"speed up\", \"run faster\", \"reduce memory\"]))\n        self.add_rule(IntentRule(\"Improve\", \"Secure\", [\"prevent sql injection\", \"xss sanitization\", \"security vulnerability\"]))\n\n        # Analyze rules\n        self.add_rule(IntentRule(\"Analyze\", \"Code Review\", [\"review this code\", \"code review for\", \"lint check\"]))\n        self.add_rule(IntentRule(\"Analyze\", \"Architecture Review\", [\"architecture review\", \"evaluate design pattern\", \"skeleton\", \"skeletonize\", \"repomix\", \"codebase map\", \"repository map\"]))\n        self.add_rule(IntentRule(\"Analyze\", \"Codebase QA\", [\"our codebase\", \"this codebase\", \"this project\", \"in this repository\", \"how does our\", \"explain our\", \"how does the codebase\", \"how is our\", \"where does our\", \"work in this project\", \"works in this project\"]))\n\n        # Convert rules\n        self.add_rule(IntentRule(\"Convert\", \"Language\", [\"convert to python\", \"translate to typescript\", \"port java to rust\"]))\n        self.add_rule(IntentRule(\"Convert\", \"Framework\", [\"migrate angularjs to angular\", \"convert react to vue\"]))\n\n        # Test rules\n        self.add_rule(IntentRule(\"Test\", \"Unit\", [\"write unit tests\", \"generate test cases\", \"pytest for\", \"junit\"]))\n\n        # Deploy rules\n        self.add_rule(IntentRule(\"Deploy\", \"Docker\", [\"dockerize\", \"dockerfile\", \"docker-compose\"]))\n        self.add_rule(IntentRule(\"Deploy\", \"CI/CD\", [\"github actions pipeline\", \"configure cicd\", \"jenkinsfile\"]))\n\n        # Design rules\n        self.add_rule(IntentRule(\"Design\", \"System\", [\"design whatsapp\", \"system design of\", \"system architecture\"]))\n        self.add_rule(IntentRule(\"Design\", \"Database\", [\"database design for\", \"design schema\"]))\n\n        # Document rules\n        self.add_rule(IntentRule(\"Document\", \"README\", [\"write readme\", \"readme.md template\"]))\n        self.add_rule(IntentRule(\"Document\", \"API Docs\", [\"generate api docs\", \"swagger documentation\"]))\n        self.add_rule(IntentRule(\"Document\", \"Comments\", [\"add comments\", \"add docstrings\", \"explain inline\"]))",
+        "code": "    def _setup_rules(self):\n        # Learn rules\n        self.add_rule(IntentRule(\"Learn\", \"Concept\", [\"what is a\", \"what is\", \"explain the\", \"explain\", \"how does\", \"concept of\"], [r\"\\bexplain\\s+[a-zA-Z0-9_-]+\"]))\n        self.add_rule(IntentRule(\"Learn\", \"Comparison\", [\"vs\", \"versus\", \"difference between\"]))\n        self.add_rule(IntentRule(\"Learn\", \"Tutorial\", [\"teach me\", \"tutorial for\", \"step by step guide\"]))\n        \n        # Build rules\n        self.add_rule(IntentRule(\"Build\", \"Frontend\", [\"login screen\", \"login page\", \"angular component\", \"css styling\", \"react widget\"]))\n        self.add_rule(IntentRule(\"Build\", \"Backend\", [\"write python code\", \"build python script\", \"node express server\", \"flask backend\"]))\n        self.add_rule(IntentRule(\"Build\", \"API\", [\"rest api\", \"graphql query\", \"express route\", \"api endpoint\"]))\n        self.add_rule(IntentRule(\"Build\", \"Database\", [\"sql table\", \"prisma schema\", \"database migration\"]))\n\n        # Fix rules\n        self.add_rule(IntentRule(\"Fix\", \"Error\", [\"why is this error\", \"app crashes\", \"uncaught exception\", \"traceback\", \"fails with\"]))\n        self.add_rule(IntentRule(\"Fix\", \"Bug\", [\"fix this bug\", \"incorrect output\", \"wrong calculations\"]))\n        self.add_rule(IntentRule(\"Fix\", \"Configuration\", [\"npm install error\", \"requirements.txt conflict\", \"webpack config\"]))\n\n        # Improve rules\n        self.add_rule(IntentRule(\"Improve\", \"Refactor\", [\"refactor this\", \"make this cleaner\", \"clean code\", \"improve readability\"]))\n        self.add_rule(IntentRule(\"Improve\", \"Optimize\", [\"optimize this\", \"speed up\", \"run faster\", \"reduce memory\"]))\n        self.add_rule(IntentRule(\"Improve\", \"Secure\", [\"prevent sql injection\", \"xss sanitization\", \"security vulnerability\"]))\n\n        # Analyze rules\n        self.add_rule(IntentRule(\"Analyze\", \"Code Review\", [\"review this code\", \"code review for\", \"lint check\"]))\n        self.add_rule(IntentRule(\"Analyze\", \"Architecture Review\", [\"architecture review\", \"evaluate design pattern\", \"skeleton\", \"skeletonize\", \"repomix\", \"codebase map\", \"repository map\"]))\n        self.add_rule(IntentRule(\"Analyze\", \"Codebase QA\", [\"our codebase\", \"this codebase\", \"this project\", \"in this repository\", \"how does our\", \"explain our\", \"how does the codebase\", \"how is our\", \"where does our\", \"work in this project\", \"works in this project\"]))\n\n        # Convert rules\n        self.add_rule(IntentRule(\"Convert\", \"Language\", [\"convert to python\", \"translate to typescript\", \"port java to rust\"]))\n        self.add_rule(IntentRule(\"Convert\", \"Framework\", [\"migrate angularjs to angular\", \"convert react to vue\"]))\n\n        # Test rules\n        self.add_rule(IntentRule(\"Test\", \"Unit\", [\"write unit tests\", \"generate test cases\", \"pytest for\", \"junit\"]))\n\n        # Deploy rules\n        self.add_rule(IntentRule(\"Deploy\", \"Docker\", [\"dockerize\", \"dockerfile\", \"docker-compose\"]))\n        self.add_rule(IntentRule(\"Deploy\", \"CI/CD\", [\"github actions pipeline\", \"configure cicd\", \"jenkinsfile\"]))\n\n        # Design rules\n        self.add_rule(IntentRule(\"Design\", \"System\", [\"design whatsapp\", \"system design of\", \"system architecture\"]))\n        self.add_rule(IntentRule(\"Design\", \"Database\", [\"database design for\", \"design schema\"]))\n\n        # Document rules\n        self.add_rule(IntentRule(\"Document\", \"README\", [\"write readme\", \"readme.md template\"]))\n        self.add_rule(IntentRule(\"Document\", \"API Docs\", [\"generate api docs\", \"swagger documentation\"]))\n        self.add_rule(IntentRule(\"Document\", \"Comments\", [\"add comments\", \"add docstrings\", \"explain inline\"]))\n\n        # Execute rules\n        self.add_rule(IntentRule(\"Execute\", \"Command\", [\"run command\", \"execute terminal\", \"run shell\", \"terminal command\", \"run script\", \"execute command\", \"bash\", \"powershell\", \"cmd\", \"npm run\", \"pip install\", \"pytest\"]))",
         "calls": [
           "self.add_rule",
           "IntentRule"
         ],
         "file": "router.py",
-        "hash": "df24e99dd4e1cc248ee1787511f6ff89",
-        "summary": "Setup rules in router.py."
+        "hash": "7d5949dc54a332ef77d56c67fa2dc2b9",
+        "summary": "Initializes a set of intent rules for a hierarchical router."
       },
       {
         "name": "add_rule",
@@ -179,13 +179,13 @@
         "name": "_setup_exemplars",
         "signature": "def _setup_exemplars(self)",
         "docstring": "",
-        "code": "    def _setup_exemplars(self):\n        exemplars = [\n            # 1. Learn\n            {\"text\": \"explain the concept of jwt token authentication oauth session login\", \"high\": \"Learn\", \"low\": \"Concept\"},\n            {\"text\": \"what is a binary tree database index hashing load balancer\", \"high\": \"Learn\", \"low\": \"Concept\"},\n            {\"text\": \"how does docker containerization virtual machine work internally\", \"high\": \"Learn\", \"low\": \"Concept\"},\n            {\"text\": \"teach me react from scratch step by step guide book\", \"high\": \"Learn\", \"low\": \"Tutorial\"},\n            {\"text\": \"guide tutorial to build a simple rest api with node js backend\", \"high\": \"Learn\", \"low\": \"Tutorial\"},\n            {\"text\": \"compare react vs vue vs angular which is better comparison pros cons\", \"high\": \"Learn\", \"low\": \"Comparison\"},\n            {\"text\": \"difference between sql and nosql postgres mongodb database engines\", \"high\": \"Learn\", \"low\": \"Comparison\"},\n            \n            # 2. Build\n            {\"text\": \"create a beautiful login screen page html css tailwind flexbox responsive\", \"high\": \"Build\", \"low\": \"Frontend\"},\n            {\"text\": \"generate a new angular component user interface dashboard card profile\", \"high\": \"Build\", \"low\": \"Frontend\"},\n            {\"text\": \"write python backend django views controller server script\", \"high\": \"Build\", \"low\": \"Backend\"},\n            {\"text\": \"implement express.js backend router logic node server code\", \"high\": \"Build\", \"low\": \"Backend\"},\n            {\"text\": \"build a rest api web service endpoint url mapping search route\", \"high\": \"Build\", \"low\": \"API\"},\n            {\"text\": \"create database tables schema model definition prisma relational diagram\", \"high\": \"Build\", \"low\": \"Database\"},\n            \n            # 3. Fix\n            {\"text\": \"why is this exception occurring error crash failure traceback bug\", \"high\": \"Fix\", \"low\": \"Error\"},\n            {\"text\": \"uncaught runtime exception typeerror undefined is not a function crash\", \"high\": \"Fix\", \"low\": \"Error\"},\n            {\"text\": \"my react app shows ExpressionChangedAfterItHasBeenCheckedError crash runtime\", \"high\": \"Fix\", \"low\": \"Error\"},\n            {\"text\": \"fix this logical bug sorting algorithm index out of bounds loop wrong value\", \"high\": \"Fix\", \"low\": \"Bug\"},\n            {\"text\": \"there is a bug in my conditional check state updates incorrect behavior\", \"high\": \"Fix\", \"low\": \"Bug\"},\n            {\"text\": \"fix dependency configuration issue package lock json node modules conflict\", \"high\": \"Fix\", \"low\": \"Configuration\"},\n            \n            # 4. Improve\n            {\"text\": \"refactor this code to follow dry clean code patterns solid design principles\", \"high\": \"Improve\", \"low\": \"Refactor\"},\n            {\"text\": \"make this class hierarchy cleaner easier to read code smell reuse\", \"high\": \"Improve\", \"low\": \"Refactor\"},\n            {\"text\": \"optimize this python function run faster reduce latency scale performance cpu\", \"high\": \"Improve\", \"low\": \"Optimize\"},\n            {\"text\": \"improve algorithm performance speed up execution decrease time complexity O(N)\", \"high\": \"Improve\", \"low\": \"Optimize\"},\n            {\"text\": \"make this script secure against sql injection sanitizing database queries\", \"high\": \"Improve\", \"low\": \"Secure\"},\n            {\"text\": \"sanitize inputs prevent cross site scripting xss vulnerability security leak\", \"high\": \"Improve\", \"low\": \"Secure\"},\n            \n            # 5. Analyze\n            {\"text\": \"please review my code for potential bugs security flaws code smells\", \"high\": \"Analyze\", \"low\": \"Code Review\"},\n            {\"text\": \"provide code review comments feedback pull request merge review\", \"high\": \"Analyze\", \"low\": \"Code Review\"},\n            {\"text\": \"analyze system architecture diagrams cloud design microservices setup\", \"high\": \"Analyze\", \"low\": \"Architecture Review\"},\n            {\"text\": \"review architecture of this node.js application components structure database\", \"high\": \"Analyze\", \"low\": \"Architecture Review\"},\n            {\"text\": \"run security scan verify packages vulnerabilities audit dependencies\", \"high\": \"Analyze\", \"low\": \"Security Review\"},\n            {\"text\": \"how does our login system work in this project\", \"high\": \"Analyze\", \"low\": \"Codebase QA\"},\n            {\"text\": \"explain how tokenization or word splitting works in our codebase\", \"high\": \"Analyze\", \"low\": \"Codebase QA\"},\n            {\"text\": \"where is the router defined in this repository\", \"high\": \"Analyze\", \"low\": \"Codebase QA\"},\n            {\"text\": \"how does the codebase process and execute queries\", \"high\": \"Analyze\", \"low\": \"Codebase QA\"},\n            \n            # 6. Convert\n            {\"text\": \"convert java code snippet logic function structure to python\", \"high\": \"Convert\", \"low\": \"Language\"},\n            {\"text\": \"translate typescript function codebase files into clean go rust code\", \"high\": \"Convert\", \"low\": \"Language\"},\n            {\"text\": \"migrate our angularjs legacy frontend application to angular 18 typescript\", \"high\": \"Convert\", \"low\": \"Framework\"},\n            {\"text\": \"convert mysql tables schemas setup query syntax to mongodb collections\", \"high\": \"Convert\", \"low\": \"Database\"},\n            \n            # 7. Test\n            {\"text\": \"write unit tests testing validation functions module using pytest unittest\", \"high\": \"Test\", \"low\": \"Unit\"},\n            {\"text\": \"generate mock test cases assertions for backend service class functions\", \"high\": \"Test\", \"low\": \"Unit\"},\n            {\"text\": \"write integration tests verifying database connection api endpoints routes pipeline\", \"high\": \"Test\", \"low\": \"Integration\"},\n            {\"text\": \"create e2e end-to-end user browser tests cypress playwright automation\", \"high\": \"Test\", \"low\": \"E2E\"},\n            \n            # 8. Deploy\n            {\"text\": \"how do i deploy host release this application on aws ec2 gcp cloud service\", \"high\": \"Deploy\", \"low\": \"Cloud\"},\n            {\"text\": \"dockerize my web application write dockerfile multi stage build container setup\", \"high\": \"Deploy\", \"low\": \"Docker\"},\n            {\"text\": \"configure ci cd automated pipeline workflow github actions jenkins deploy script\", \"high\": \"Deploy\", \"low\": \"CI/CD\"},\n            \n            # 9. Design\n            {\"text\": \"design system architecture scaled whatsapp chat application netflix load balancer\", \"high\": \"Design\", \"low\": \"System\"},\n            {\"text\": \"create database schema entity relationship diagram architecture ERD design\", \"high\": \"Design\", \"low\": \"Database\"},\n            {\"text\": \"design REST API endpoints specs swagger schema blueprints paths design patterns\", \"high\": \"Design\", \"low\": \"API\"},\n            \n            # 10. Document\n            {\"text\": \"write readme md markdown documentation file repository documentation structure\", \"high\": \"Document\", \"low\": \"README\"},\n            {\"text\": \"generate swagger openapi specs api docs document paths outputs queries\", \"high\": \"Document\", \"low\": \"API Docs\"},\n            {\"text\": \"add documentation code comments python docstrings explain logic inside methods\", \"high\": \"Document\", \"low\": \"Comments\"}\n        ]\n        self.similarity_engine = TfidfSimilarity(exemplars)",
+        "code": "    def _setup_exemplars(self):\n        exemplars = [\n            # 1. Learn\n            {\"text\": \"explain the concept of jwt token authentication oauth session login\", \"high\": \"Learn\", \"low\": \"Concept\"},\n            {\"text\": \"what is a binary tree database index hashing load balancer\", \"high\": \"Learn\", \"low\": \"Concept\"},\n            {\"text\": \"how does docker containerization virtual machine work internally\", \"high\": \"Learn\", \"low\": \"Concept\"},\n            {\"text\": \"teach me react from scratch step by step guide book\", \"high\": \"Learn\", \"low\": \"Tutorial\"},\n            {\"text\": \"guide tutorial to build a simple rest api with node js backend\", \"high\": \"Learn\", \"low\": \"Tutorial\"},\n            {\"text\": \"compare react vs vue vs angular which is better comparison pros cons\", \"high\": \"Learn\", \"low\": \"Comparison\"},\n            {\"text\": \"difference between sql and nosql postgres mongodb database engines\", \"high\": \"Learn\", \"low\": \"Comparison\"},\n            \n            # 2. Build\n            {\"text\": \"create a beautiful login screen page html css tailwind flexbox responsive\", \"high\": \"Build\", \"low\": \"Frontend\"},\n            {\"text\": \"generate a new angular component user interface dashboard card profile\", \"high\": \"Build\", \"low\": \"Frontend\"},\n            {\"text\": \"write python backend django views controller server script\", \"high\": \"Build\", \"low\": \"Backend\"},\n            {\"text\": \"implement express.js backend router logic node server code\", \"high\": \"Build\", \"low\": \"Backend\"},\n            {\"text\": \"build a rest api web service endpoint url mapping search route\", \"high\": \"Build\", \"low\": \"API\"},\n            {\"text\": \"create database tables schema model definition prisma relational diagram\", \"high\": \"Build\", \"low\": \"Database\"},\n            \n            # 3. Fix\n            {\"text\": \"why is this exception occurring error crash failure traceback bug\", \"high\": \"Fix\", \"low\": \"Error\"},\n            {\"text\": \"uncaught runtime exception typeerror undefined is not a function crash\", \"high\": \"Fix\", \"low\": \"Error\"},\n            {\"text\": \"my react app shows ExpressionChangedAfterItHasBeenCheckedError crash runtime\", \"high\": \"Fix\", \"low\": \"Error\"},\n            {\"text\": \"fix this logical bug sorting algorithm index out of bounds loop wrong value\", \"high\": \"Fix\", \"low\": \"Bug\"},\n            {\"text\": \"there is a bug in my conditional check state updates incorrect behavior\", \"high\": \"Fix\", \"low\": \"Bug\"},\n            {\"text\": \"fix dependency configuration issue package lock json node modules conflict\", \"high\": \"Fix\", \"low\": \"Configuration\"},\n            \n            # 4. Improve\n            {\"text\": \"refactor this code to follow dry clean code patterns solid design principles\", \"high\": \"Improve\", \"low\": \"Refactor\"},\n            {\"text\": \"make this class hierarchy cleaner easier to read code smell reuse\", \"high\": \"Improve\", \"low\": \"Refactor\"},\n            {\"text\": \"optimize this python function run faster reduce latency scale performance cpu\", \"high\": \"Improve\", \"low\": \"Optimize\"},\n            {\"text\": \"improve algorithm performance speed up execution decrease time complexity O(N)\", \"high\": \"Improve\", \"low\": \"Optimize\"},\n            {\"text\": \"make this script secure against sql injection sanitizing database queries\", \"high\": \"Improve\", \"low\": \"Secure\"},\n            {\"text\": \"sanitize inputs prevent cross site scripting xss vulnerability security leak\", \"high\": \"Improve\", \"low\": \"Secure\"},\n            \n            # 5. Analyze\n            {\"text\": \"please review my code for potential bugs security flaws code smells\", \"high\": \"Analyze\", \"low\": \"Code Review\"},\n            {\"text\": \"provide code review comments feedback pull request merge review\", \"high\": \"Analyze\", \"low\": \"Code Review\"},\n            {\"text\": \"analyze system architecture diagrams cloud design microservices setup\", \"high\": \"Analyze\", \"low\": \"Architecture Review\"},\n            {\"text\": \"review architecture of this node.js application components structure database\", \"high\": \"Analyze\", \"low\": \"Architecture Review\"},\n            {\"text\": \"run security scan verify packages vulnerabilities audit dependencies\", \"high\": \"Analyze\", \"low\": \"Security Review\"},\n            {\"text\": \"how does our login system work in this project\", \"high\": \"Analyze\", \"low\": \"Codebase QA\"},\n            {\"text\": \"explain how tokenization or word splitting works in our codebase\", \"high\": \"Analyze\", \"low\": \"Codebase QA\"},\n            {\"text\": \"where is the router defined in this repository\", \"high\": \"Analyze\", \"low\": \"Codebase QA\"},\n            {\"text\": \"how does the codebase process and execute queries\", \"high\": \"Analyze\", \"low\": \"Codebase QA\"},\n            \n            # 6. Convert\n            {\"text\": \"convert java code snippet logic function structure to python\", \"high\": \"Convert\", \"low\": \"Language\"},\n            {\"text\": \"translate typescript function codebase files into clean go rust code\", \"high\": \"Convert\", \"low\": \"Language\"},\n            {\"text\": \"migrate our angularjs legacy frontend application to angular 18 typescript\", \"high\": \"Convert\", \"low\": \"Framework\"},\n            {\"text\": \"convert mysql tables schemas setup query syntax to mongodb collections\", \"high\": \"Convert\", \"low\": \"Database\"},\n            \n            # 7. Test\n            {\"text\": \"write unit tests testing validation functions module using pytest unittest\", \"high\": \"Test\", \"low\": \"Unit\"},\n            {\"text\": \"generate mock test cases assertions for backend service class functions\", \"high\": \"Test\", \"low\": \"Unit\"},\n            {\"text\": \"write integration tests verifying database connection api endpoints routes pipeline\", \"high\": \"Test\", \"low\": \"Integration\"},\n            {\"text\": \"create e2e end-to-end user browser tests cypress playwright automation\", \"high\": \"Test\", \"low\": \"E2E\"},\n            \n            # 8. Deploy\n            {\"text\": \"how do i deploy host release this application on aws ec2 gcp cloud service\", \"high\": \"Deploy\", \"low\": \"Cloud\"},\n            {\"text\": \"dockerize my web application write dockerfile multi stage build container setup\", \"high\": \"Deploy\", \"low\": \"Docker\"},\n            {\"text\": \"configure ci cd automated pipeline workflow github actions jenkins deploy script\", \"high\": \"Deploy\", \"low\": \"CI/CD\"},\n            \n            # 9. Design\n            {\"text\": \"design system architecture scaled whatsapp chat application netflix load balancer\", \"high\": \"Design\", \"low\": \"System\"},\n            {\"text\": \"create database schema entity relationship diagram architecture ERD design\", \"high\": \"Design\", \"low\": \"Database\"},\n            {\"text\": \"design REST API endpoints specs swagger schema blueprints paths design patterns\", \"high\": \"Design\", \"low\": \"API\"},\n            \n            # 10. Document\n            {\"text\": \"write readme md markdown documentation file repository documentation structure\", \"high\": \"Document\", \"low\": \"README\"},\n            {\"text\": \"generate swagger openapi specs api docs document paths outputs queries\", \"high\": \"Document\", \"low\": \"API Docs\"},\n            {\"text\": \"add documentation code comments python docstrings explain logic inside methods\", \"high\": \"Document\", \"low\": \"Comments\"},\n            \n            # 11. Execute\n            {\"text\": \"run npm test command to execute test suite\", \"high\": \"Execute\", \"low\": \"Command\"},\n            {\"text\": \"execute python script check results\", \"high\": \"Execute\", \"low\": \"Command\"},\n            {\"text\": \"run shell command list files directory\", \"high\": \"Execute\", \"low\": \"Command\"},\n            {\"text\": \"run git status in terminal\", \"high\": \"Execute\", \"low\": \"Command\"},\n            {\"text\": \"execute command to install pip requirements\", \"high\": \"Execute\", \"low\": \"Command\"}\n        ]\n        self.similarity_engine = TfidfSimilarity(exemplars)",
         "calls": [
           "TfidfSimilarity"
         ],
         "file": "router.py",
-        "hash": "4a4eac10eb6b19fb47a89784645f498a",
-        "summary": "Setup exemplars in router.py."
+        "hash": "269a6a3161a898b779dbb13869105b10",
+        "summary": "Initializes a similarity engine with a predefined set of exemplars."
       },
       {
         "name": "route",
@@ -205,6 +205,36 @@
         "file": "router.py",
         "hash": "26a370824477e11fb8ab3f28c467f28c",
         "summary": "Route in router.py."
+      }
+    ]
+  },
+  {
+    "type": "class",
+    "name": "AgenticPlanner",
+    "file": "router.py",
+    "filepath": "C:\\Users\\Admin\\OneDrive\\Documents\\Coding Agents\\router.py",
+    "bases": [],
+    "docstring": "",
+    "methods": [
+      {
+        "name": "plan",
+        "signature": "def plan(self, prompt: str, tools_info: list) -> list",
+        "docstring": "",
+        "code": "    def plan(self, prompt: str, tools_info: list) -> list:\n        api_key = get_nvidia_api_key()\n        if not api_key:\n            return []\n            \n        tools_str = json.dumps(tools_info, indent=2)\n        user_prompt = (\n            f\"User Coding Request: \\\"{prompt}\\\"\\n\\n\"\n            f\"Available Tools:\\n{tools_str}\\n\\n\"\n            f\"Please generate the JSON plan containing the sequence of steps to fulfill this request.\"\n        )\n        \n        try:\n            res = query_nvidia(user_prompt, self.SYSTEM_PROMPT).strip()\n            # Clean up potential markdown wrappers\n            if res.startswith(\"```\"):\n                res = re.sub(r\"^```(?:json)?\\n\", \"\", res)\n                res = re.sub(r\"\\n```$\", \"\", res)\n            res = res.strip()\n            \n            plan_data = json.loads(res)\n            return plan_data.get(\"plan\", [])\n        except Exception:\n            return []",
+        "calls": [
+          "get_nvidia_api_key",
+          "json.dumps",
+          "query_nvidia(user_prompt, self.SYSTEM_PROMPT).strip",
+          "res.startswith",
+          "res.strip",
+          "json.loads",
+          "plan_data.get",
+          "re.sub",
+          "query_nvidia"
+        ],
+        "file": "router.py",
+        "hash": "a198b227e09599e9fd904e3d07ead66c",
+        "summary": "Generates a JSON plan containing the sequence of steps to fulfill a user request."
       }
     ]
   },
@@ -233,7 +263,7 @@
         "name": "_register_tools",
         "signature": "def _register_tools(self)",
         "docstring": "",
-        "code": "    def _register_tools(self):\n        # Register tools\n        self.tools[\"Learn\"] = WebSearchTool(\"LearnTool\", \"Searches documentation and tutorials.\")\n        self.tools[\"Build\"] = CodeGeneratorTool(\"BuilderTool\", \"Creates frontend/backend/database code.\")\n        self.tools[\"Fix\"] = DebuggerTool(\"DebuggerTool\", \"Diagnoses errors and suggests patches.\")\n        self.tools[\"Improve\"] = CodeOptimizerTool(\"OptimizerTool\", \"Refactors and speeds up execution.\")\n        self.tools[\"Analyze\"] = CodeReviewerTool(\"ReviewerTool\", \"Performs code audits and quality reviews.\")\n        self.tools[\"Convert\"] = CodeConverterTool(\"ConverterTool\", \"Translates code languages and migrates frameworks.\")\n        self.tools[\"Test\"] = TestGeneratorTool(\"TestGenTool\", \"Generates unit and integration tests.\")\n        self.tools[\"Deploy\"] = DeploymentTool(\"DeployerTool\", \"Creates deployment configuration pipelines.\")\n        self.tools[\"Design\"] = SystemDesignTool(\"DesignTool\", \"Generates architectural systems designs.\")\n        self.tools[\"Document\"] = DocumentationTool(\"DocTool\", \"Generates READMEs and API documentation.\")\n        # Fallback tool\n        self.tools[\"Default\"] = DefaultAgentChat(\"DefaultChat\", \"Standard conversational chatbot.\")",
+        "code": "    def _register_tools(self):\n        # Register tools\n        self.tools[\"Learn\"] = WebSearchTool(\"LearnTool\", \"Searches documentation and tutorials.\")\n        self.tools[\"Build\"] = CodeGeneratorTool(\"BuilderTool\", \"Creates frontend/backend/database code.\")\n        self.tools[\"Fix\"] = DebuggerTool(\"DebuggerTool\", \"Diagnoses errors and suggests patches.\")\n        self.tools[\"Improve\"] = CodeOptimizerTool(\"OptimizerTool\", \"Refactors and speeds up execution.\")\n        self.tools[\"Analyze\"] = CodeReviewerTool(\"ReviewerTool\", \"Performs code audits and quality reviews.\")\n        self.tools[\"Convert\"] = CodeConverterTool(\"ConverterTool\", \"Translates code languages and migrates frameworks.\")\n        self.tools[\"Test\"] = TestGeneratorTool(\"TestGenTool\", \"Generates unit and integration tests.\")\n        self.tools[\"Deploy\"] = DeploymentTool(\"DeployerTool\", \"Creates deployment configuration pipelines.\")\n        self.tools[\"Design\"] = SystemDesignTool(\"DesignTool\", \"Generates architectural systems designs.\")\n        self.tools[\"Document\"] = DocumentationTool(\"DocTool\", \"Generates READMEs and API documentation.\")\n        self.tools[\"Execute\"] = TerminalExecutorTool(\"TerminalExecutorTool\", \"Executes terminal/shell commands and reads output.\")\n        # Fallback tool\n        self.tools[\"Default\"] = DefaultAgentChat(\"DefaultChat\", \"Standard conversational chatbot.\")",
         "calls": [
           "WebSearchTool",
           "CodeGeneratorTool",
@@ -245,11 +275,12 @@
           "DeploymentTool",
           "SystemDesignTool",
           "DocumentationTool",
+          "TerminalExecutorTool",
           "DefaultAgentChat"
         ],
         "file": "router.py",
-        "hash": "b2eee8a2b250b85ba723f21e6e025cd0",
-        "summary": "Register tools in router.py."
+        "hash": "7eb58e43d70d3d8ecc68353de4c52886",
+        "summary": "Registers various tools with their respective names and descriptions in the 'tools' dictionary."
       },
       {
         "name": "get_tool_for_intent",
@@ -267,18 +298,24 @@
         "name": "process_and_execute",
         "signature": "def process_and_execute(self, prompt: str) -> Dict[str, Any]",
         "docstring": "",
-        "code": "    def process_and_execute(self, prompt: str) -> Dict[str, Any]:\n        # Step 1: Run Router\n        routing_result = self.router.route(prompt)\n        high_intents = routing_result[\"high_level\"]\n        low_intents = routing_result[\"low_level\"]\n\n        execution_outputs = []\n        dispatched_tools = []\n\n        # Step 2: Dispatch and Execute matched tools\n        for intent in high_intents:\n            tool = self.get_tool_for_intent(intent)\n            if tool.name not in [t.name for t in dispatched_tools]:\n                dispatched_tools.append(tool)\n                # Filter low intents corresponding to this high level intent if needed (simplified here)\n                output = tool.execute(prompt, low_intents)\n                execution_outputs.append(output)\n\n        return {\n            \"prompt\": prompt,\n            \"high_level\": high_intents[0] if len(high_intents) == 1 else high_intents,\n            \"low_level\": low_intents[0] if len(low_intents) == 1 else low_intents,\n            \"confidence\": routing_result[\"best_score\"],\n            \"dispatched_tools\": [t.name for t in dispatched_tools],\n            \"execution_results\": execution_outputs\n        }",
+        "code": "    def process_and_execute(self, prompt: str) -> Dict[str, Any]:\n        # Gather tool info for the planner\n        tools_info = []\n        for intent, tool in self.tools.items():\n            if intent == \"Default\":\n                continue\n            tools_info.append({\n                \"tool\": intent,\n                \"name\": tool.name,\n                \"description\": tool.description\n            })\n            \n        planner = AgenticPlanner()\n        plan = planner.plan(prompt, tools_info)\n        \n        is_fallback = False\n        if not plan:\n            # Fall back to Hierarchical Router\n            is_fallback = True\n            routing_result = self.router.route(prompt)\n            high_intents = routing_result[\"high_level\"]\n            \n            plan = []\n            for intent in high_intents:\n                plan.append({\n                    \"tool\": intent,\n                    \"description\": f\"Fallback route to {intent} tool\",\n                    \"prompt\": prompt\n                })\n                \n        execution_outputs = []\n        dispatched_tools = []\n        step_details = []\n        \n        for step in plan:\n            intent = step[\"tool\"]\n            step_prompt = step[\"prompt\"]\n            step_desc = step[\"description\"]\n            \n            tool = self.get_tool_for_intent(intent)\n            if tool.name not in dispatched_tools:\n                dispatched_tools.append(tool.name)\n            \n            # Retrieve low-level intents for this step's sub-prompt\n            step_routing = self.router.route(step_prompt)\n            step_low_levels = step_routing[\"low_level\"]\n            \n            # Execute\n            output = tool.execute(step_prompt, step_low_levels)\n            execution_outputs.append(output)\n            \n            step_details.append({\n                \"tool\": tool.name,\n                \"intent\": intent,\n                \"description\": step_desc,\n                \"prompt\": step_prompt,\n                \"output\": output\n            })\n            \n        if plan:\n            first_step_routing = self.router.route(plan[0][\"prompt\"])\n            high_level = first_step_routing[\"high_level\"]\n            low_level = first_step_routing[\"low_level\"]\n            confidence = first_step_routing[\"best_score\"]\n        else:\n            high_level = [\"Default\"]\n            low_level = [\"Concept\"]\n            confidence = 0.0\n            \n        return {\n            \"prompt\": prompt,\n            \"plan\": plan,\n            \"is_fallback\": is_fallback,\n            \"high_level\": high_level[0] if len(high_level) == 1 else high_level,\n            \"low_level\": low_level[0] if len(low_level) == 1 else low_level,\n            \"confidence\": confidence,\n            \"dispatched_tools\": dispatched_tools,\n            \"execution_results\": execution_outputs,\n            \"steps\": step_details\n        }",
         "calls": [
+          "self.tools.items",
+          "AgenticPlanner",
+          "planner.plan",
+          "tools_info.append",
           "self.router.route",
           "self.get_tool_for_intent",
-          "dispatched_tools.append",
           "tool.execute",
           "execution_outputs.append",
+          "step_details.append",
+          "plan.append",
+          "dispatched_tools.append",
           "len"
         ],
         "file": "router.py",
-        "hash": "cfe1f48fa64fcedb6b398faa1f937d13",
-        "summary": "Process and execute in router.py."
+        "hash": "920368fb2782924ac9a502c26591e307",
+        "summary": "Executes a plan to process a given prompt by gathering tool information, planning the execution, and dispatching tools to produce execution results."
       }
     ]
   },
@@ -325,6 +362,24 @@
   },
   {
     "type": "function",
+    "name": "create_hello_script",
+    "file": "hello.py",
+    "filepath": "C:\\Users\\Admin\\OneDrive\\Documents\\Coding Agents\\scratch\\hello.py",
+    "signature": "def create_hello_script()",
+    "docstring": "Creates a simple hello world Python script at scratch/hello.py",
+    "code": "def create_hello_script():\n    \"\"\"\n    Creates a simple hello world Python script at scratch/hello.py\n    \"\"\"\n    # Define the content of the hello world script\n    hello_script_content = '''#!/usr/bin/env python3\n\"\"\"\nhello.py\nA simple hello world script.\n\"\"\"\n\ndef main():\n    \"\"\"Prints a hello world message.\"\"\"\n    print(\"Hello, World!\")\n\nif __name__ == \"__main__\":\n    main()\n'''\n\n    # Define the directory and file path\n    scratch_dir = \"scratch\"\n    file_path = os.path.join(scratch_dir, \"hello.py\")\n\n    # Create the scratch directory if it doesn't exist\n    os.makedirs(scratch_dir, exist_ok=True)\n    print(f\"Directory '{scratch_dir}' created or already exists.\")\n\n    # Write the hello world script to the file\n    with open(file_path, \"w\") as file:\n        file.write(hello_script_content)\n\n    print(f\"Hello world script created at: {file_path}\")",
+    "calls": [
+      "os.path.join",
+      "os.makedirs",
+      "print",
+      "open",
+      "file.write"
+    ],
+    "hash": "4e975af650a8d671d8519e9c83067310",
+    "summary": "Creates a simple hello world Python script at scratch/hello.py"
+  },
+  {
+    "type": "function",
     "name": "main",
     "file": "test_context_manager.py",
     "filepath": "C:\\Users\\Admin\\OneDrive\\Documents\\Coding Agents\\scratch\\test_context_manager.py",
@@ -338,6 +393,24 @@
     ],
     "hash": "91fb18be0f24605789836a0c8501ed2f",
     "summary": "Main in test_context_manager.py."
+  },
+  {
+    "type": "function",
+    "name": "main",
+    "file": "test_planner.py",
+    "filepath": "C:\\Users\\Admin\\OneDrive\\Documents\\Coding Agents\\scratch\\test_planner.py",
+    "signature": "def main()",
+    "docstring": "",
+    "code": "def main():\n    print(\"=== Testing Agentic Planner on Multi-Step Request ===\")\n    orchestrator = ToolOrchestrator()\n    prompt = \"Write a python function to compute TF-IDF, write unit tests for it, and then document the code.\"\n    \n    print(f\"Prompt: \\\"{prompt}\\\"\\n\")\n    res = orchestrator.process_and_execute(prompt)\n    \n    print(\"--- PLAN GENERATED ---\")\n    for i, step in enumerate(res.get(\"plan\", []), 1):\n        print(f\"Step {i}: {step['description']}\")\n        print(f\"  Tool:   {step['tool']}\")\n        print(f\"  Prompt: {step['prompt']}\")\n        \n    print(\"\\n--- EXECUTION DETAILS ---\")\n    print(f\"Dispatched Tools: {res.get('dispatched_tools')}\")\n    print(f\"Is Fallback?:     {res.get('is_fallback')}\")\n    \n    print(\"\\n--- DETAILED STEP OUTPUTS ---\")\n    for i, step in enumerate(res.get(\"steps\", []), 1):\n        print(f\"\\n[Step {i}] {step['tool']} ({step['intent']}):\")\n        print(step[\"output\"])\n        print(\"-\" * 50)",
+    "calls": [
+      "print",
+      "ToolOrchestrator",
+      "orchestrator.process_and_execute",
+      "enumerate",
+      "res.get"
+    ],
+    "hash": "3a3a451eb7b8de9dab7f242f87d20e6f",
+    "summary": "Executes a multi-step request using the ToolOrchestrator to generate a plan, execute tasks, and display detailed step outputs."
   },
   {
     "type": "function",
@@ -401,7 +474,7 @@
     "filepath": "C:\\Users\\Admin\\OneDrive\\Documents\\Coding Agents\\tools\\base.py",
     "signature": "def query_nvidia(prompt: str, system_prompt: str='') -> str",
     "docstring": "",
-    "code": "def query_nvidia(prompt: str, system_prompt: str = \"\") -> str:\n    api_key = get_nvidia_api_key()\n    if not api_key:\n        return \"NVIDIA API Error: NVIDIA_API_KEY is not set.\"\n        \n    try:\n        url = \"https://integrate.api.nvidia.com/v1/chat/completions\"\n        data = {\n            \"model\": \"moonshotai/kimi-k2.6\",\n            \"messages\": [\n                {\"role\": \"system\", \"content\": system_prompt},\n                {\"role\": \"user\", \"content\": prompt}\n            ],\n            \"temperature\": 0.2,\n            \"max_tokens\": 1024,\n            \"stream\": False\n        }\n        headers = {\n            \"Content-Type\": \"application/json\",\n            \"Authorization\": f\"Bearer {api_key}\"\n        }\n        req = urllib.request.Request(url, data=json.dumps(data).encode(\"utf-8\"), headers=headers)\n        with urllib.request.urlopen(req, timeout=60) as r:\n            res = json.loads(r.read().decode(\"utf-8\"))\n            return res[\"choices\"][0][\"message\"][\"content\"].strip()\n    except Exception as e:\n        return f\"NVIDIA API Error: {str(e)}\"",
+    "code": "def query_nvidia(prompt: str, system_prompt: str = \"\") -> str:\n    api_key = get_nvidia_api_key()\n    if not api_key:\n        return \"NVIDIA API Error: NVIDIA_API_KEY is not set.\"\n        \n    try:\n        url = \"https://integrate.api.nvidia.com/v1/chat/completions\"\n        data = {\n            \"model\": \"meta/llama-3.1-8b-instruct\",\n            \"messages\": [\n                {\"role\": \"system\", \"content\": system_prompt},\n                {\"role\": \"user\", \"content\": prompt}\n            ],\n            \"temperature\": 0.2,\n            \"max_tokens\": 1024,\n            \"stream\": False\n        }\n        headers = {\n            \"Content-Type\": \"application/json\",\n            \"Authorization\": f\"Bearer {api_key}\"\n        }\n        req = urllib.request.Request(url, data=json.dumps(data).encode(\"utf-8\"), headers=headers)\n        with urllib.request.urlopen(req, timeout=60) as r:\n            res = json.loads(r.read().decode(\"utf-8\"))\n            return res[\"choices\"][0][\"message\"][\"content\"].strip()\n    except Exception as e:\n        return f\"NVIDIA API Error: {str(e)}\"",
     "calls": [
       "get_nvidia_api_key",
       "urllib.request.Request",
@@ -414,8 +487,8 @@
       "json.dumps",
       "r.read"
     ],
-    "hash": "4c463cfcaa3191f02081567eb5b069ed",
-    "summary": "Query nvidia in base.py."
+    "hash": "2a14130aba9d00816d2e2b92d8f163bc",
+    "summary": "Queries the NVIDIA API to generate a response to a given prompt."
   },
   {
     "type": "class",
@@ -485,11 +558,59 @@
         "name": "execute",
         "signature": "def execute(self, prompt: str, low_levels: List[str]) -> str",
         "docstring": "",
-        "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        return (\n            f\"[CODE] [CodeGeneratorTool Activated] generating code scaffold for: {low_levels}\\n\"\n            f\"   -> Scaffold type: boilerplate class/configuration\\n\"\n            f\"   -> Generated Output:\\n\"\n            f\"      // Boilerplate for {low_levels}\\n\"\n            f\"      class Handler:\\n\"\n            f\"          def __init__(self):\\n\"\n            f\"              pass # Initialized for {prompt[:30]}...\"\n        )",
-        "calls": [],
+        "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        # 1. Parse target file path if requested\n        target_file = self._extract_target_file(prompt)\n        \n        api_key = get_nvidia_api_key()\n        if not api_key:\n            fallback_code = (\n                f\"class Handler:\\n\"\n                f\"    def __init__(self):\\n\"\n                f\"        # Fallback dummy logic for low levels: {low_levels}\\n\"\n                f\"        pass\"\n            )\n            if target_file:\n                try:\n                    parent = os.path.dirname(target_file)\n                    if parent:\n                        os.makedirs(parent, exist_ok=True)\n                    with open(target_file, \"w\", encoding=\"utf-8\") as f:\n                        f.write(fallback_code)\n                    return (\n                        f\"[CODE] [CodeGeneratorTool Activated] Warning: NVIDIA_API_KEY is not set. \"\n                        f\"Saved dummy fallback code to {target_file}.\\n\"\n                        f\"Code:\\n{fallback_code}\"\n                    )\n                except Exception as e:\n                    return f\"[CODE] [CodeGeneratorTool Activated] Warning: NVIDIA_API_KEY is not set. Failed to write fallback file: {str(e)}\"\n            return (\n                f\"[CODE] [CodeGeneratorTool Activated] Warning: NVIDIA_API_KEY is not set. \"\n                f\"Returning dummy fallback code.\\n\"\n                f\"Code:\\n{fallback_code}\"\n            )\n            \n        # 2. Call LLM to generate the code\n        sys_prompt = (\n            \"You are an expert code generator. Generate clean, correct, and well-commented code \"\n            \"based on the user's request. Output ONLY the code itself, without any conversational \"\n            \"intro or outro. If you use markdown code blocks, make sure they are formatted correctly \"\n            \"with language specifiers.\"\n        )\n        \n        prompt_with_context = (\n            f\"Generate code for: \\\"{prompt}\\\".\\n\"\n            f\"Requirements/Context: {low_levels}.\"\n        )\n        \n        generated = query_nvidia(prompt_with_context, sys_prompt)\n        if \"NVIDIA API Error\" in generated:\n            fallback_code = (\n                f\"# Fallback code generated due to API Error: {generated}\\n\"\n                f\"class Handler:\\n\"\n                f\"    def __init__(self):\\n\"\n                f\"        # Fallback dummy logic for low levels: {low_levels}\\n\"\n                f\"        pass\"\n            )\n            if target_file:\n                try:\n                    target_abs = os.path.abspath(target_file)\n                    parent = os.path.dirname(target_abs)\n                    if parent:\n                        os.makedirs(parent, exist_ok=True)\n                    with open(target_abs, \"w\", encoding=\"utf-8\") as f:\n                        f.write(fallback_code)\n                    return (\n                        f\"[CODE] [CodeGeneratorTool Activated] API Error: {generated}. \"\n                        f\"Saved fallback code to {target_file}.\\n\"\n                        f\"Code:\\n{fallback_code}\"\n                    )\n                except Exception as e:\n                    return f\"[CODE] [CodeGeneratorTool Activated] API Error: {generated}. Failed to write fallback file: {str(e)}\"\n            return f\"[CODE] [CodeGeneratorTool Activated] API Error: {generated}\"\n            \n        raw_code = self._clean_code_output(generated)\n        \n        # 3. Save to file if target path specified\n        if target_file:\n            try:\n                # Make path relative to workspace or absolute if specified absolute\n                target_abs = os.path.abspath(target_file)\n                parent = os.path.dirname(target_abs)\n                if parent:\n                    os.makedirs(parent, exist_ok=True)\n                with open(target_abs, \"w\", encoding=\"utf-8\") as f:\n                    f.write(raw_code)\n                    \n                return (\n                    f\"[CODE] [CodeGeneratorTool Activated] Code generated successfully:\\n\"\n                    f\"   -> Saved to File: {target_file}\\n\"\n                    f\"   -> Absolute Path: {target_abs}\\n\\n\"\n                    f\"--- File Contents ---\\n\"\n                    f\"{raw_code}\"\n                )\n            except Exception as e:\n                return (\n                    f\"[CODE] [CodeGeneratorTool Activated] Code generated successfully but failed to write file:\\n\"\n                    f\"   -> Target: {target_file}\\n\"\n                    f\"   -> Error: {str(e)}\\n\\n\"\n                    f\"--- Generated Code ---\\n\"\n                    f\"{raw_code}\"\n                )\n        else:\n            return (\n                f\"[CODE] [CodeGeneratorTool Activated] Code generated successfully (no file path requested):\\n\\n\"\n                f\"--- Generated Code ---\\n\"\n                f\"{raw_code}\"\n            )",
+        "calls": [
+          "self._extract_target_file",
+          "get_nvidia_api_key",
+          "query_nvidia",
+          "self._clean_code_output",
+          "os.path.abspath",
+          "os.path.dirname",
+          "os.makedirs",
+          "open",
+          "f.write",
+          "str"
+        ],
         "file": "code_generator.py",
-        "hash": "483fde0c7885ac802b9d866b8fef3311",
-        "summary": "Execute in code_generator.py."
+        "hash": "d8c303753b457bfeeb8b14378fb92baa",
+        "summary": "Generates code based on the user's request and requirements."
+      },
+      {
+        "name": "_extract_target_file",
+        "signature": "def _extract_target_file(self, prompt: str) -> str",
+        "docstring": "",
+        "code": "    def _extract_target_file(self, prompt: str) -> str:\n        # Regex-based extraction first (fast and precise)\n        patterns = [\n            r'(?:save|write|output|create|file|filename|filepath)(?:\\s+to|\\s+at)?\\s*:\\s*[\\'\"`]?([a-zA-Z0-9_\\-\\.\\/\\\\:]+)[\\'\"`]?',\n            r'(?:save|write|output|create|create\\s+file)\\s*(?:\\s+to|\\s+at)?\\s*[\\'\"`]?([a-zA-Z0-9_\\-\\/\\\\:]+\\.[a-zA-Z0-9]+|[a-zA-Z0-9_\\-]+\\/[a-zA-Z0-9_\\-\\.]+|[a-zA-Z0-9_\\-]+\\\\[a-zA-Z0-9_\\-\\.]+)[\\'\"`]?',\n            r'\\b(?:into|in)\\s+[\\'\"`]?([a-zA-Z0-9_\\-\\/\\\\:]+\\.[a-zA-Z0-9]+|[a-zA-Z0-9_\\-]+\\/[a-zA-Z0-9_\\-\\.]+|[a-zA-Z0-9_\\-]+\\\\[a-zA-Z0-9_\\-\\.]+)[\\'\"`]?'\n        ]\n        for pattern in patterns:\n            match = re.search(pattern, prompt, re.IGNORECASE)\n            if match:\n                candidate = match.group(1).strip()\n                # Confirm it looks like a file path\n                if \".\" in candidate or \"/\" in candidate or \"\\\\\" in candidate:\n                    return candidate\n                    \n        # LLM extraction fallback if API key is set\n        api_key = get_nvidia_api_key()\n        if api_key:\n            extract_prompt = (\n                f\"Identify if the following prompt asks to save, write, or create code in a specific file path or filename. \"\n                f\"If a specific file path is requested, return ONLY that file path (e.g. 'src/index.js' or 'app.py'). \"\n                f\"If no specific file path is mentioned, return ONLY the word 'None'.\\n\\n\"\n                f\"Prompt: {prompt}\"\n            )\n            sys_prompt = \"You are a precise filename extractor. Output only the filename/path or 'None'.\"\n            try:\n                res = query_nvidia(extract_prompt, sys_prompt).strip()\n                if res and res.lower() != \"none\" and \"nvidia api error\" not in res.lower() and len(res) < 200:\n                    return res.strip(\"'\\\"` \")\n            except Exception:\n                pass\n                \n        return \"\"",
+        "calls": [
+          "get_nvidia_api_key",
+          "re.search",
+          "match.group(1).strip",
+          "query_nvidia(extract_prompt, sys_prompt).strip",
+          "res.strip",
+          "match.group",
+          "query_nvidia",
+          "res.lower",
+          "len"
+        ],
+        "file": "code_generator.py",
+        "hash": "5c5863b9f67325b354388a35cf2a1a85",
+        "summary": "Extracts the target file path or filename from a given prompt using regular expressions and, if necessary, a language model."
+      },
+      {
+        "name": "_clean_code_output",
+        "signature": "def _clean_code_output(self, code: str) -> str",
+        "docstring": "",
+        "code": "    def _clean_code_output(self, code: str) -> str:\n        code_strip = code.strip()\n        \n        # 1. Match code blocks with language specifiers\n        match = re.search(r'```[a-zA-Z0-9_\\-\\+\\#]+\\n(.*?)\\n```', code_strip, re.DOTALL)\n        if match:\n            return match.group(1).strip()\n            \n        # 2. Match standard code blocks without language specifier\n        match2 = re.search(r'```\\n?(.*?)\\n?```', code_strip, re.DOTALL)\n        if match2:\n            return match2.group(1).strip()\n            \n        return code_strip",
+        "calls": [
+          "code.strip",
+          "re.search",
+          "match.group(1).strip",
+          "match2.group(1).strip",
+          "match.group",
+          "match2.group"
+        ],
+        "file": "code_generator.py",
+        "hash": "75e7824ee90d330b255d542460408d3c",
+        "summary": "Extracts and returns the code block from a given string, stripping any leading or trailing whitespace."
       }
     ]
   },
@@ -1069,6 +1190,68 @@
         "file": "system_design.py",
         "hash": "9d9d50ace74c466340e3f26ef0ff1eac",
         "summary": "Execute in system_design.py."
+      }
+    ]
+  },
+  {
+    "type": "class",
+    "name": "TerminalExecutorTool",
+    "file": "terminal_executor.py",
+    "filepath": "C:\\Users\\Admin\\OneDrive\\Documents\\Coding Agents\\tools\\terminal_executor.py",
+    "bases": [
+      "BaseTool"
+    ],
+    "docstring": "",
+    "methods": [
+      {
+        "name": "execute",
+        "signature": "def execute(self, prompt: str, low_levels: List[str]) -> str",
+        "docstring": "",
+        "code": "    def execute(self, prompt: str, low_levels: List[str]) -> str:\n        # Extract command\n        command = self._extract_command(prompt)\n        if not command:\n            return (\n                f\"[EXECUTE] [TerminalExecutorTool Activated] Could not identify or extract command from prompt.\\n\"\n                f\"Prompt: {prompt}\"\n            )\n            \n        try:\n            # Run the command in the shell\n            # Set timeout to 30 seconds\n            # Use subprocess.DEVNULL for stdin to avoid blocking on prompts\n            result = subprocess.run(\n                command,\n                shell=True,\n                capture_output=True,\n                text=True,\n                stdin=subprocess.DEVNULL,\n                timeout=30\n            )\n            \n            # Format the output beautifully\n            output = (\n                f\"[EXECUTE] [TerminalExecutorTool Activated] Executed command: {command}\\n\"\n                f\"   -> Working Directory: {os.getcwd()}\\n\"\n                f\"   -> Exit Code: {result.returncode}\\n\"\n            )\n            \n            if result.stdout.strip():\n                output += f\"   -> Output:\\n{result.stdout}\\n\"\n            else:\n                output += \"   -> Output: [Empty]\\n\"\n                \n            if result.stderr.strip():\n                output += f\"   -> Error/Stderr:\\n{result.stderr}\\n\"\n                \n            return output\n            \n        except subprocess.TimeoutExpired:\n            return (\n                f\"[EXECUTE] [TerminalExecutorTool Activated] Execution timed out (limit: 30s) for command: {command}\"\n            )\n        except Exception as e:\n            return (\n                f\"[EXECUTE] [TerminalExecutorTool Activated] Failed to run command: {command}\\n\"\n                f\"   -> Error details: {str(e)}\"\n            )",
+        "calls": [
+          "self._extract_command",
+          "subprocess.run",
+          "result.stdout.strip",
+          "result.stderr.strip",
+          "os.getcwd",
+          "str"
+        ],
+        "file": "terminal_executor.py",
+        "hash": "8f2f640adeb602b92e689167e0663655",
+        "summary": "Executes a command in the shell, capturing and formatting its output, and returning the result as a formatted string."
+      },
+      {
+        "name": "_extract_command",
+        "signature": "def _extract_command(self, prompt: str) -> str",
+        "docstring": "",
+        "code": "    def _extract_command(self, prompt: str) -> str:\n        prompt_strip = prompt.strip()\n        \n        # 1. Look for markdown code blocks (e.g. ```bash ... ```)\n        code_block_match = re.search(r'```(?:[a-zA-Z0-9_\\-\\+]+)?\\n(.*?)\\n```', prompt_strip, re.DOTALL)\n        if code_block_match:\n            return code_block_match.group(1).strip()\n            \n        # 2. Look for any code block without explicit language/newline prefix\n        code_block_match2 = re.search(r'```(.*?)```', prompt_strip, re.DOTALL)\n        if code_block_match2:\n            return code_block_match2.group(1).strip()\n            \n        # 3. Look for inline backticks\n        inline_match = re.search(r'`([^`]+)`', prompt_strip)\n        if inline_match:\n            return inline_match.group(1).strip()\n            \n        # 4. Use LLM if API key exists\n        api_key = get_nvidia_api_key()\n        if api_key:\n            extract_prompt = (\n                f\"Extract the single exact terminal command to execute from the following request. \"\n                f\"Return ONLY the plain command string without any surrounding quotes, markdown formatting, or extra explanation.\\n\\n\"\n                f\"Request: {prompt}\"\n            )\n            sys_prompt = \"You are a precise command extractor. Output only the command itself, nothing else.\"\n            command = query_nvidia(extract_prompt, sys_prompt).strip()\n            if command and \"NVIDIA API Error\" not in command and len(command) < 500:\n                # Clean up any potential markdown wrappers the model output anyway\n                if command.startswith(\"`\") and command.endswith(\"`\"):\n                    command = command.strip(\"`\").strip()\n                if command.startswith(\"```\") and command.endswith(\"```\"):\n                    lines = command.splitlines()\n                    if len(lines) >= 3:\n                        command = \"\\n\".join(lines[1:-1]).strip()\n                return command\n                \n        # 5. Clean up prompt prefix and fall back\n        cleaned = prompt_strip\n        # Remove common request prefixes case-insensitively\n        prefixes = [\n            r'^run\\s+command\\s*:\\s*',\n            r'^run\\s+command\\s+',\n            r'^run\\s+the\\s+command\\s+',\n            r'^run\\s+',\n            r'^execute\\s+command\\s*:\\s*',\n            r'^execute\\s+command\\s+',\n            r'^execute\\s+the\\s+command\\s+',\n            r'^execute\\s+',\n            r'^terminal\\s*:\\s*',\n            r'^shell\\s*:\\s*'\n        ]\n        for pattern in prefixes:\n            match = re.match(pattern, cleaned, re.IGNORECASE)\n            if match:\n                cleaned = cleaned[match.end():].strip()\n                break\n                \n        return cleaned",
+        "calls": [
+          "prompt.strip",
+          "re.search",
+          "get_nvidia_api_key",
+          "code_block_match.group(1).strip",
+          "code_block_match2.group(1).strip",
+          "inline_match.group(1).strip",
+          "query_nvidia(extract_prompt, sys_prompt).strip",
+          "re.match",
+          "cleaned[match.end():].strip",
+          "code_block_match.group",
+          "code_block_match2.group",
+          "inline_match.group",
+          "query_nvidia",
+          "len",
+          "command.startswith",
+          "command.endswith",
+          "command.strip('`').strip",
+          "command.splitlines",
+          "'\\n'.join(lines[1:-1]).strip",
+          "command.strip",
+          "'\\n'.join",
+          "match.end"
+        ],
+        "file": "terminal_executor.py",
+        "hash": "4b720fce0fa5949cd884acf8f4f5b483",
+        "summary": "Extracts the single exact terminal command to execute from the given prompt."
       }
     ]
   },

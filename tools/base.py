@@ -65,7 +65,7 @@ def query_nvidia(prompt: str, system_prompt: str = "") -> str:
     try:
         url = "https://integrate.api.nvidia.com/v1/chat/completions"
         data = {
-            "model": "moonshotai/kimi-k2.6",
+            "model": "meta/llama-3.1-8b-instruct",
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt}
