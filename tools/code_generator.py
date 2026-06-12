@@ -5,92 +5,131 @@ from tools.base import BaseTool, get_nvidia_api_key, query_nvidia
 
 class CodeGeneratorTool(BaseTool):
     def execute(self, prompt: str, low_levels: List[str]) -> str:
+        # 1. Parse target file path if requested
+        target_file = self._extract_target_file(prompt)
+        
         api_key = get_nvidia_api_key()
         if not api_key:
-            return (
-                f"[CODE] [CodeGeneratorTool Activated] Error: NVIDIA_API_KEY is not set.\n"
-                f"Please set your NVIDIA_API_KEY in your environment or .env file to enable LLM code generation.\n\n"
-                f"--- Fallback Mock Scaffold ---\n"
-                f"// Boilerplate generated for: {prompt[:50]}...\n"
-                f"class Boilerplate:\n"
+            fallback_code = (
+                f"class Handler:\n"
                 f"    def __init__(self):\n"
+                f"        # Fallback dummy logic for low levels: {low_levels}\n"
                 f"        pass"
             )
-
-        # Detect target file path to save code
-        target_path = self._detect_target_path(prompt)
-
-        system_prompt = (
-            "You are an expert code generator. Your task is to write high-quality, clean, well-structured, "
-            "and complete code as requested by the user. "
-            "Return the code inside a standard markdown code block specifying the programming language (e.g., ```python ... ```).\n\n"
-            "Ensure there is no introductory or concluding conversational text, just the code block. "
-            "Include comments in the code to explain complex parts if requested."
-        )
-
-        try:
-            # Query the NVIDIA Kimi LLM
-            raw_response = query_nvidia(prompt, system_prompt)
-            if "NVIDIA API Error" in raw_response:
-                return f"[CODE] [CodeGeneratorTool Activated] LLM Generation failed: {raw_response}"
-
-            cleaned_code = self._clean_code(raw_response)
-
-            if target_path:
+            if target_file:
                 try:
-                    # Ensure parent directories exist
-                    dir_name = os.path.dirname(target_path)
-                    if dir_name:
-                        os.makedirs(dir_name, exist_ok=True)
-
-                    with open(target_path, "w", encoding="utf-8") as f:
-                        f.write(cleaned_code)
-
+                    parent = os.path.dirname(target_file)
+                    if parent:
+                        os.makedirs(parent, exist_ok=True)
+                    with open(target_file, "w", encoding="utf-8") as f:
+                        f.write(fallback_code)
                     return (
-                        f"[CODE] [CodeGeneratorTool Activated] Code generated and saved to: {target_path}\n"
-                        f"   -> Working Directory: {os.getcwd()}\n"
-                        f"   -> File size: {len(cleaned_code)} bytes\n\n"
-                        f"--- Code Preview ---\n"
-                        f"{raw_response}"
+                        f"[CODE] [CodeGeneratorTool Activated] Warning: NVIDIA_API_KEY is not set. "
+                        f"Saved dummy fallback code to {target_file}.\n"
+                        f"Code:\n{fallback_code}"
                     )
                 except Exception as e:
-                    return (
-                        f"[CODE] [CodeGeneratorTool Activated] Code generated but failed to save to file '{target_path}': {str(e)}\n\n"
-                        f"--- Generated Code ---\n"
-                        f"{raw_response}"
-                    )
-            else:
-                return (
-                    f"[CODE] [CodeGeneratorTool Activated] Code generated successfully:\n\n"
-                    f"{raw_response}"
-                )
-
-        except Exception as e:
-            return f"[CODE] [CodeGeneratorTool Activated] Error during code generation: {str(e)}"
-
-    def _detect_target_path(self, prompt: str) -> str:
-        # Match patterns like: save to main.py, write to src/index.js, output to file.html
-        path_match = re.search(
-            r'(?:save\s+to|write\s+to|output\s+to|create\s+file|save\s+file\s+to|file\s*:\s*)\s*([a-zA-Z0-9_\-\.\/\\:]+)',
-            prompt,
-            re.IGNORECASE
+                    return f"[CODE] [CodeGeneratorTool Activated] Warning: NVIDIA_API_KEY is not set. Failed to write fallback file: {str(e)}"
+            return (
+                f"[CODE] [CodeGeneratorTool Activated] Warning: NVIDIA_API_KEY is not set. "
+                f"Returning dummy fallback code.\n"
+                f"Code:\n{fallback_code}"
+            )
+            
+        # 2. Call LLM to generate the code
+        sys_prompt = (
+            "You are an expert code generator. Generate clean, correct, and well-commented code "
+            "based on the user's request. Output ONLY the code itself, without any conversational "
+            "intro or outro. If you use markdown code blocks, make sure they are formatted correctly "
+            "with language specifiers."
         )
-        if path_match:
-            target_path = path_match.group(1).strip()
-            # Double check that it contains a file extension or explicitly looks like a file name
-            if '.' in os.path.basename(target_path):
-                return target_path
+        
+        prompt_with_context = (
+            f"Generate code for: \"{prompt}\".\n"
+            f"Requirements/Context: {low_levels}."
+        )
+        
+        generated = query_nvidia(prompt_with_context, sys_prompt)
+        if "NVIDIA API Error" in generated:
+            return f"[CODE] [CodeGeneratorTool Activated] API Error during code generation: {generated}"
+            
+        raw_code = self._clean_code_output(generated)
+        
+        # 3. Save to file if target path specified
+        if target_file:
+            try:
+                # Make path relative to workspace or absolute if specified absolute
+                target_abs = os.path.abspath(target_file)
+                parent = os.path.dirname(target_abs)
+                if parent:
+                    os.makedirs(parent, exist_ok=True)
+                with open(target_abs, "w", encoding="utf-8") as f:
+                    f.write(raw_code)
+                    
+                return (
+                    f"[CODE] [CodeGeneratorTool Activated] Code generated successfully:\n"
+                    f"   -> Saved to File: {target_file}\n"
+                    f"   -> Absolute Path: {target_abs}\n\n"
+                    f"--- File Contents ---\n"
+                    f"{raw_code}"
+                )
+            except Exception as e:
+                return (
+                    f"[CODE] [CodeGeneratorTool Activated] Code generated successfully but failed to write file:\n"
+                    f"   -> Target: {target_file}\n"
+                    f"   -> Error: {str(e)}\n\n"
+                    f"--- Generated Code ---\n"
+                    f"{raw_code}"
+                )
+        else:
+            return (
+                f"[CODE] [CodeGeneratorTool Activated] Code generated successfully (no file path requested):\n\n"
+                f"--- Generated Code ---\n"
+                f"{raw_code}"
+            )
+
+    def _extract_target_file(self, prompt: str) -> str:
+        # Regex-based extraction first (fast)
+        patterns = [
+            r'(?:save|write|output|create|file|filename|filepath)(?:\s+to|\s+at)?\s*:\s*[\'"`]?([a-zA-Z0-9_\-\.\/\\:]+)[\'"`]?',
+            r'(?:save|write|output|create\s+file)\s*(?:\s+to|\s+at)?\s*[\'"`]?([a-zA-Z0-9_\-\.\/\\:]+)[\'"`]?',
+            r'\b(?:into|in)\s+[\'"`]?([a-zA-Z0-9_\-\.\/\\:]+)[\'"`]?'
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, prompt, re.IGNORECASE)
+            if match:
+                candidate = match.group(1).strip()
+                # Confirm it looks like a file path (contains extensions, slash, etc.)
+                if "." in candidate or "/" in candidate or "\\" in candidate:
+                    return candidate
+                    
+        # LLM extraction fallback if API key is set
+        api_key = get_nvidia_api_key()
+        if api_key:
+            extract_prompt = (
+                f"Identify if the following prompt asks to save, write, or create code in a specific file path or filename. "
+                f"If a specific file path is requested, return ONLY that file path (e.g. 'src/index.js' or 'app.py'). "
+                f"If no specific file path is mentioned, return ONLY the word 'None'.\n\n"
+                f"Prompt: {prompt}"
+            )
+            sys_prompt = "You are a precise filename extractor. Output only the filename/path or 'None'."
+            res = query_nvidia(extract_prompt, sys_prompt).strip()
+            if res and res.lower() != "none" and "nvidia api error" not in res.lower() and len(res) < 200:
+                return res.strip("'\"` ")
+                
         return ""
 
-    def _clean_code(self, raw_code: str) -> str:
-        # Find first markdown code block (e.g. ```python ... ```)
-        code_block_match = re.search(r'```(?:[a-zA-Z0-9_\-\+]+)?\n(.*?)\n```', raw_code, re.DOTALL)
-        if code_block_match:
-            return code_block_match.group(1).strip()
+    def _clean_code_output(self, code: str) -> str:
+        code_strip = code.strip()
+        
+        # 1. Match code blocks with language specifiers
+        match = re.search(r'```[a-zA-Z0-9_\-\+\#]+\n(.*?)\n```', code_strip, re.DOTALL)
+        if match:
+            return match.group(1).strip()
             
-        # Fallback to search for generic ticks
-        code_block_match2 = re.search(r'```(.*?)```', raw_code, re.DOTALL)
-        if code_block_match2:
-            return code_block_match2.group(1).strip()
+        # 2. Match standard code blocks without language specifier
+        match2 = re.search(r'```\n?(.*?)\n?```', code_strip, re.DOTALL)
+        if match2:
+            return match2.group(1).strip()
             
-        return raw_code.strip()
+        return code_strip
