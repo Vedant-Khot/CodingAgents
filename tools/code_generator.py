@@ -51,7 +51,29 @@ class CodeGeneratorTool(BaseTool):
         
         generated = query_nvidia(prompt_with_context, sys_prompt)
         if "NVIDIA API Error" in generated:
-            return f"[CODE] [CodeGeneratorTool Activated] API Error during code generation: {generated}"
+            fallback_code = (
+                f"# Fallback code generated due to API Error: {generated}\n"
+                f"class Handler:\n"
+                f"    def __init__(self):\n"
+                f"        # Fallback dummy logic for low levels: {low_levels}\n"
+                f"        pass"
+            )
+            if target_file:
+                try:
+                    target_abs = os.path.abspath(target_file)
+                    parent = os.path.dirname(target_abs)
+                    if parent:
+                        os.makedirs(parent, exist_ok=True)
+                    with open(target_abs, "w", encoding="utf-8") as f:
+                        f.write(fallback_code)
+                    return (
+                        f"[CODE] [CodeGeneratorTool Activated] API Error: {generated}. "
+                        f"Saved fallback code to {target_file}.\n"
+                        f"Code:\n{fallback_code}"
+                    )
+                except Exception as e:
+                    return f"[CODE] [CodeGeneratorTool Activated] API Error: {generated}. Failed to write fallback file: {str(e)}"
+            return f"[CODE] [CodeGeneratorTool Activated] API Error: {generated}"
             
         raw_code = self._clean_code_output(generated)
         
@@ -89,17 +111,17 @@ class CodeGeneratorTool(BaseTool):
             )
 
     def _extract_target_file(self, prompt: str) -> str:
-        # Regex-based extraction first (fast)
+        # Regex-based extraction first (fast and precise)
         patterns = [
             r'(?:save|write|output|create|file|filename|filepath)(?:\s+to|\s+at)?\s*:\s*[\'"`]?([a-zA-Z0-9_\-\.\/\\:]+)[\'"`]?',
-            r'(?:save|write|output|create\s+file)\s*(?:\s+to|\s+at)?\s*[\'"`]?([a-zA-Z0-9_\-\.\/\\:]+)[\'"`]?',
-            r'\b(?:into|in)\s+[\'"`]?([a-zA-Z0-9_\-\.\/\\:]+)[\'"`]?'
+            r'(?:save|write|output|create|create\s+file)\s*(?:\s+to|\s+at)?\s*[\'"`]?([a-zA-Z0-9_\-\/\\:]+\.[a-zA-Z0-9]+|[a-zA-Z0-9_\-]+\/[a-zA-Z0-9_\-\.]+|[a-zA-Z0-9_\-]+\\[a-zA-Z0-9_\-\.]+)[\'"`]?',
+            r'\b(?:into|in)\s+[\'"`]?([a-zA-Z0-9_\-\/\\:]+\.[a-zA-Z0-9]+|[a-zA-Z0-9_\-]+\/[a-zA-Z0-9_\-\.]+|[a-zA-Z0-9_\-]+\\[a-zA-Z0-9_\-\.]+)[\'"`]?'
         ]
         for pattern in patterns:
             match = re.search(pattern, prompt, re.IGNORECASE)
             if match:
                 candidate = match.group(1).strip()
-                # Confirm it looks like a file path (contains extensions, slash, etc.)
+                # Confirm it looks like a file path
                 if "." in candidate or "/" in candidate or "\\" in candidate:
                     return candidate
                     
@@ -113,9 +135,12 @@ class CodeGeneratorTool(BaseTool):
                 f"Prompt: {prompt}"
             )
             sys_prompt = "You are a precise filename extractor. Output only the filename/path or 'None'."
-            res = query_nvidia(extract_prompt, sys_prompt).strip()
-            if res and res.lower() != "none" and "nvidia api error" not in res.lower() and len(res) < 200:
-                return res.strip("'\"` ")
+            try:
+                res = query_nvidia(extract_prompt, sys_prompt).strip()
+                if res and res.lower() != "none" and "nvidia api error" not in res.lower() and len(res) < 200:
+                    return res.strip("'\"` ")
+            except Exception:
+                pass
                 
         return ""
 
